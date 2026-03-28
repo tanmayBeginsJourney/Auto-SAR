@@ -1,0 +1,7 @@
+Case_Priority,Customer_ID,Customer_Name,Primary_Account_Number,Customer_Type,Primary_Scenario,Why_Selected
+1,IND003,Amit Verma,AC1003,Individual,Cash structuring below INR 10,00,000 followed by high-value outward transfer,"Clear reporting-bank layering pattern with four near-threshold cash deposits and one large RTGS to ENT001"
+2,ENT001,Vertex Exports Pvt Ltd,AC2001,Legal person/entity,One-to-many outward transfers with monthly spike,"Receives unusual large inflow from IND003 inside the reporting bank and then disperses funds to four beneficiaries within hours"
+3,IND011,Pooja Iyer,AC1011,Individual,Suspicious inflow followed by high-value crypto exchange transfer,"Receives a high-value transfer from ENT001 and moves most of it to a Binance exchange wallet on the same day"
+4,IND008,Farhan Ali,AC1008,Individual,Dormant account reactivation and rapid cash-out,"Dormant reporting-bank account receives small inward transfers and exits funds through cash withdrawals from different locations"
+5,IND007,Arjun Malhotra,AC1007,Individual,Many-to-one fund transfer,"Four remitters credit the reporting-bank account within two hours with no comparable historical activity"
+6,IND009,Meera Sethi,AC1009,Individual,Structuring below INR 50,000,"Three same-day cash deposits just under INR 50,000 create a clean low-ticket smurfing example in the reporting bank branch network"

@@ -1,0 +1,15 @@
+Rule_ID,Rule_Name,Threshold_Logic,Configured_Value,Time_Window,Notes
+R01,High value cash deposits in a day,Aggregate cash deposits to one account in a day,INR 1000000,1 day,Used for AC1003 on 14-09-2022 and 15-09-2022
+R02,High value cash withdrawals in a day,Aggregate cash withdrawals from one account in a day,INR 1000000,1 day,Included for completeness but not triggered in this demo
+R03,High value non-cash deposits in a day,Aggregate non-cash credits to one account in a day,INR 1500000,1 day,Can support RTGS or NEFT concentration cases
+R04,High value non-cash withdrawals in a day,Aggregate non-cash debits from one account in a day,INR 1500000,1 day,Triggered by ENT001 on 21-09-2022
+R05,Sudden high value transaction for the client,Transaction above absolute floor and above prior largest transaction,Greater than INR 1500000 and greater than 200 percent of prior largest,Rolling historical baseline,Triggered by AC1003 outbound RTGS
+R06,Sudden increase in value of transactions in a month,Current month transaction value exceeds prior average,Greater than 250 percent of prior 3-month average,Monthly,Triggered by AC2001 and AC1003 in Sep 2022
+R07,Sudden increase in number of transactions in a month,Current month transaction count exceeds prior average,Greater than 200 percent of prior 3-month average,Monthly,Triggered by AC2001 and AC1003 in Sep 2022
+R08,Splitting of cash deposits just below INR 1000000,Repeated near-threshold cash deposits,3 or more deposits between INR 900000 and INR 999999,3 days,Triggered by AC1003
+R09,Splitting of cash deposits just below INR 50000,Repeated near-threshold cash deposits,3 or more deposits between INR 45000 and INR 49999,2 days,Triggered by AC1009
+R10,Repeated small value transfers from multiple parties followed by immediate withdrawals,Multiple inward transfers then cash-out,2 or more inward transfers below INR 100000 and withdrawal within 24 hours,24 hours,Triggered by AC1008
+R11,Many to one fund transfer,Multiple remitters credit one account,4 or more unique remitters to one beneficiary,2 days,Triggered by AC1007
+R12,One to many fund transfer,One remitter pays multiple beneficiaries,4 or more unique beneficiaries from one sender,2 days,Triggered by AC2001
+R13,Sudden activity in a dormant account,Inactive account becomes active,No customer-initiated transaction for 90 days then fresh activity,90 days,Triggered by AC1008
+R14,High value transfer to crypto exchange after suspicious inflow,Customer receives material inflow and transfers funds to a crypto exchange wallet,Transfer above INR 500000 to a crypto exchange within 24 hours of high-risk inward credit,24 hours,Triggered by AC1011 after receipt from ENT001
