@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard | Defensible AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Inter', sans-serif; color: #3D3D3A; line-height: 1.6; -webkit-font-smoothing: antialiased; background: #F5F4F1; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 20px; vertical-align: middle; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: #9B9B93; }
+  table tr.parent-row:hover td { background: #FAFAF8; }
+  .child-row { background: #FAFAF8; }
+</style>
+<script>
+  function toggleRow(id) {
+    const row = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    if (row.style.display === 'none') {
+      row.style.display = 'table-row';
+      icon.innerHTML = 'expand_less';
+    } else {
+      row.style.display = 'none';
+      icon.innerHTML = 'expand_more';
+    }
+  }
+</script>
+</head>
+<body class="min-h-screen flex">
+
+<aside style="width:240px;background:#FFFFFF;border-right:1px solid #E5E4DF;" class="fixed left-0 top-0 h-full flex flex-col py-6 z-50 overflow-y-auto">
+  <div class="px-6 mb-6">
+    <div class="flex items-center gap-2">
+      <div style="width:28px;height:28px;background:#1A4FDB;border-radius:6px;" class="flex items-center justify-center">
+        <span class="material-symbols-outlined text-white" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">shield</span>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:#1A4FDB;letter-spacing:-0.02em;">Defensible AI</div>
+      </div>
+    </div>
+    <div style="height:1px;background:#E5E4DF;margin-top:16px;"></div>
+  </div>
+  
+  <nav class="px-3 space-y-0.5 mb-8">
+    <a href="#" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#1A4FDB;font-size:14px;font-weight:500;background:#EEF2FF;">
+      <span class="material-symbols-outlined" style="color:#1A4FDB;">grid_view</span>Dashboard
+    </a>
+    <div style="height:1px;background:#E5E4DF;margin:12px 0;"></div>
+    <a href="#" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">settings</span>Settings
+    </a>
+  </nav>
+
+  <div class="px-3 mt-auto mb-2">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#FAFAF8;border:1px solid #F0EFE9;border-radius:8px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:#1A4FDB;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;">PS</div>
+      <div>
+        <div style="font-size:14px;font-weight:500;color:#3D3D3A;line-height:1.2;">Priya Sharma</div>
+        <div style="font-size:11px;color:#9B9B93;margin-top:2px;">L1 Analyst</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main style="margin-left:240px;flex:1;min-height:100vh;display:flex;flex-direction:column;">
+
+  <header style="height:60px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #E5E4DF;position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#9B9B93;">
+      <span>Dashboard</span>
+    </div>
+    <div style="position:relative;width:300px;">
+      <span class="material-symbols-outlined" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9B9B93;font-size:18px;">search</span>
+      <input type="text" placeholder="Search cases, customers..." style="width:100%;height:34px;padding:0 12px 0 36px;background:#F5F4F1;border:none;border-radius:6px;font-size:13px;color:#3D3D3A;outline:none;font-family:Inter,sans-serif;"/>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button style="background:none;border:none;cursor:pointer;position:relative;">
+        <span class="material-symbols-outlined" style="color:#9B9B93;">notifications</span>
+        <span style="position:absolute;top:0;right:0;width:8px;height:8px;background:#DC2626;border-radius:50%;border:2px solid #fff;"></span>
+      </button>
+      <div style="width:28px;height:28px;border-radius:50%;background:#1A4FDB;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;">PS</div>
+    </div>
+  </header>
+
+  <div style="padding:24px;max-width:1400px;width:100%;">
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;height:80px;padding:0 20px;display:flex;align-items:center;gap:16px;">
+        <span class="material-symbols-outlined" style="color:#9B9B93;">notifications</span>
+        <div>
+          <div style="font-size:24px;font-weight:500;line-height:1;color:#3D3D3A;">38</div>
+          <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Open alerts</div>
+        </div>
+      </div>
+      <div style="background:#FEF2F2;border:1px solid #E5E4DF;border-radius:10px;height:80px;padding:0 20px;display:flex;align-items:center;gap:16px;">
+        <span class="material-symbols-outlined" style="color:#DC2626;">warning</span>
+        <div>
+          <div style="font-size:24px;font-weight:500;line-height:1;color:#DC2626;">3</div>
+          <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Breaching SLA</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;height:80px;padding:0 20px;display:flex;align-items:center;gap:16px;">
+        <span class="material-symbols-outlined" style="color:#9B9B93;">pending_actions</span>
+        <div>
+          <div style="font-size:24px;font-weight:500;line-height:1;color:#3D3D3A;">12</div>
+          <div style="font-size:12px;color:#9B9B93;margin-top:2px;">In progress</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;height:80px;padding:0 20px;display:flex;align-items:center;gap:16px;">
+        <span class="material-symbols-outlined" style="color:#9B9B93;">visibility</span>
+        <div>
+          <div style="font-size:24px;font-weight:500;line-height:1;color:#3D3D3A;">5</div>
+          <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Pending PO review</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;">
+      <div>
+        <h1 style="font-size:18px;font-weight:500;color:#1A1A18;margin:0;">My Dashboard</h1>
+        <p style="font-size:13px;color:#9B9B93;margin:2px 0 0;">14 Active Cases (38 Alerts) · Sorted by SLA deadline</p>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;">
+        <button style="display:flex;align-items:center;gap:4px;padding:0 12px;height:30px;background:#fff;border:1px solid #E5E4DF;border-radius:6px;font-size:12px;font-weight:500;color:#3D3D3A;cursor:pointer;font-family:Inter,sans-serif;">Status <span class="material-symbols-outlined" style="font-size:14px;">expand_more</span></button>
+        <button style="display:flex;align-items:center;gap:4px;padding:0 12px;height:30px;background:#fff;border:1px solid #E5E4DF;border-radius:6px;font-size:12px;font-weight:500;color:#3D3D3A;cursor:pointer;font-family:Inter,sans-serif;">Trigger type <span class="material-symbols-outlined" style="font-size:14px;">expand_more</span></button>
+        <button style="display:flex;align-items:center;gap:4px;padding:0 12px;height:30px;background:#fff;border:1px solid #E5E4DF;border-radius:6px;font-size:12px;font-weight:500;color:#3D3D3A;cursor:pointer;font-family:Inter,sans-serif;">Customer segment <span class="material-symbols-outlined" style="font-size:14px;">expand_more</span></button>
+      </div>
+      <div style="display:flex;gap:4px;background:#E5E4DF;padding:4px;border-radius:8px;">
+        <button style="padding:4px 12px;font-size:11px;font-weight:500;background:none;border:none;border-radius:6px;cursor:pointer;color:#9B9B93;font-family:Inter,sans-serif;">Custom</button>
+        <button style="padding:4px 12px;font-size:11px;font-weight:500;background:none;border:none;border-radius:6px;cursor:pointer;color:#9B9B93;font-family:Inter,sans-serif;">Today</button>
+        <button style="padding:4px 12px;font-size:11px;font-weight:500;background:none;border:none;border-radius:6px;cursor:pointer;color:#9B9B93;font-family:Inter,sans-serif;">7D</button>
+        <button style="padding:4px 12px;font-size:11px;font-weight:500;background:#fff;border:none;border-radius:6px;cursor:pointer;color:#1A4FDB;font-family:Inter,sans-serif;">30D</button>
+        <button style="padding:4px 12px;font-size:11px;font-weight:500;background:none;border:none;border-radius:6px;cursor:pointer;color:#9B9B93;font-family:Inter,sans-serif;">3M</button>
+      </div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="height:40px;border-bottom:1px solid #F0EFE9;background:#FAFAF8;">
+            <th style="padding:0 0 0 16px;width:36px;"></th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:left;padding:0 12px;">Case ID</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:left;padding:0 12px;">Customer</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:center;padding:0 12px;">Total Alerts</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:right;padding:0 12px;">Total Amount</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:left;padding:0 12px;">Max Risk</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:left;padding:0 12px;">SLA Remaining</th>
+            <th style="font-size:11px;font-weight:500;color:#9B9B93;letter-spacing:0.05em;text-transform:uppercase;text-align:right;padding:0 24px 0 12px;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr class="parent-row" style="height:48px;border-bottom:1px solid #F0EFE9;cursor:pointer;" onclick="toggleRow('child-1')">
+            <td style="padding:0 0 0 16px;text-align:center;"><span id="icon-child-1" class="material-symbols-outlined" style="font-size:18px;color:#9B9B93;">expand_less</span></td>
+            <td style="padding:0 12px;"><a href="03_caseworkspacedataassembly.html" class="mono" style="color:#1A4FDB;text-decoration:none;font-size:13px;font-weight:500;">CASE-20260219-ND</a></td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;height:48px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#0D9488;color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;">ND</div>
+              Noureddine Darib
+            </td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:center;">3</td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:right;font-family:ui-monospace,monospace;">₹3.84 Cr</td>
+            <td style="padding:0 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;font-weight:500;width:24px;">87</span>
+                <div style="width:60px;height:4px;background:#F0EFE9;border-radius:4px;overflow:hidden;"><div style="width:87%;height:100%;background:#DC2626;border-radius:4px;"></div></div>
+              </div>
+            </td>
+            <td style="padding:0 12px;font-size:12px;font-weight:500;color:#DC2626;">18 hrs</td>
+            <td style="padding:0 24px 0 12px;text-align:right;"><span style="background:#EEF2FF;color:#1A4FDB;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;">OPEN</span></td>
+          </tr>
+
+          <tr id="child-1" class="child-row" style="display:table-row;border-bottom:1px solid #E5E4DF;">
+            <td colspan="8" style="padding:16px 24px 16px 48px;">
+              <div style="background:#fff;border:1px solid #E5E4DF;border-radius:8px;padding:16px;">
+                
+                <div style="margin-bottom:16px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: High-velocity pass-through</span>
+                    <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260219-001</span>
+                  </div>
+                  <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #F0EFE9;">
+                      <td class="mono" style="padding:4px 0;">TXN-IN-8842</td>
+                      <td style="padding:4px 0;color:#9B9B93;">01 Feb 2026 · Wire Transfer (UAE Originator)</td>
+                      <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹16.5 L</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #F0EFE9;">
+                      <td class="mono" style="padding:4px 0;">TXN-IN-8843</td>
+                      <td style="padding:4px 0;color:#9B9B93;">02 Feb 2026 · Wire Transfer (UAE Originator)</td>
+                      <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹18.0 L</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="background:#FEF3C7;color:#D97706;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: PEP Adjacency Match</span>
+                    <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260219-002</span>
+                  </div>
+                  <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #F0EFE9;">
+                      <td class="mono" style="padding:4px 0;">TXN-IN-8850</td>
+                      <td style="padding:4px 0;color:#9B9B93;">05 Feb 2026 · Wire Transfer (Flagged Originator Match)</td>
+                      <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹4.0 L</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <span style="background:#EEF2FF;color:#1A4FDB;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: Cross-border discrepancy</span>
+                    <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260219-003</span>
+                  </div>
+                  <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                    <tr style="border-bottom:1px solid #F0EFE9;">
+                      <td class="mono" style="padding:4px 0;">TXN-OUT-442</td>
+                      <td style="padding:4px 0;color:#9B9B93;">02 Feb 2026 · RTGS Outward (Beneficiary Co HK)</td>
+                      <td style="padding:4px 0;text-align:right;font-weight:500;color:#DC2626;">-₹34.5 L</td>
+                    </tr>
+                  </table>
+                </div>
+
+              </div>
+            </td>
+          </tr>
+
+          <tr class="parent-row" style="height:48px;border-bottom:1px solid #F0EFE9;cursor:pointer;" onclick="toggleRow('child-2')">
+            <td style="padding:0 0 0 16px;text-align:center;"><span id="icon-child-2" class="material-symbols-outlined" style="font-size:18px;color:#9B9B93;">expand_more</span></td>
+            <td style="padding:0 12px;"><span class="mono" style="color:#1A4FDB;font-size:13px;font-weight:500;">CASE-20260219-JS</span></td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;height:48px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#EA580C;color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;">JS</div>
+              John Smith
+            </td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:center;">2</td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:right;font-family:ui-monospace,monospace;">₹1.25 Cr</td>
+            <td style="padding:0 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;font-weight:500;width:24px;">74</span>
+                <div style="width:60px;height:4px;background:#F0EFE9;border-radius:4px;overflow:hidden;"><div style="width:74%;height:100%;background:#D97706;border-radius:4px;"></div></div>
+              </div>
+            </td>
+            <td style="padding:0 12px;font-size:12px;font-weight:500;color:#D97706;">31 hrs</td>
+            <td style="padding:0 24px 0 12px;text-align:right;"><span style="background:#FEF3C7;color:#D97706;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;">IN PROGRESS</span></td>
+          </tr>
+          
+          <tr id="child-2" class="child-row" style="display:none;border-bottom:1px solid #E5E4DF;">
+             <td colspan="8" style="padding:16px 24px 16px 48px;">
+               <div style="background:#fff;border:1px solid #E5E4DF;border-radius:8px;padding:16px;">
+                 <div style="margin-bottom:16px;">
+                   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                     <span style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: PEP list match</span>
+                     <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260219-004</span>
+                   </div>
+                   <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                     <tr style="border-bottom:1px solid #F0EFE9;">
+                       <td class="mono" style="padding:4px 0;">TXN-IN-9011</td>
+                       <td style="padding:4px 0;color:#9B9B93;">04 Feb 2026 · Wire Transfer (Originator: Politically Exposed)</td>
+                       <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹1.0 Cr</td>
+                     </tr>
+                   </table>
+                 </div>
+                 <div>
+                   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                     <span style="background:#EEF2FF;color:#1A4FDB;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: Unusual Cash Deposit</span>
+                     <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260219-005</span>
+                   </div>
+                   <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                     <tr style="border-bottom:1px solid #F0EFE9;">
+                       <td class="mono" style="padding:4px 0;">TXN-CSH-102</td>
+                       <td style="padding:4px 0;color:#9B9B93;">06 Feb 2026 · Branch Cash Deposit</td>
+                       <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹25.0 L</td>
+                     </tr>
+                   </table>
+                 </div>
+               </div>
+             </td>
+          </tr>
+
+          <tr class="parent-row" style="height:48px;border-bottom:1px solid #F0EFE9;cursor:pointer;" onclick="toggleRow('child-3')">
+            <td style="padding:0 0 0 16px;text-align:center;"><span id="icon-child-3" class="material-symbols-outlined" style="font-size:18px;color:#9B9B93;">expand_more</span></td>
+            <td style="padding:0 12px;"><span class="mono" style="color:#1A4FDB;font-size:13px;font-weight:500;">CASE-20260220-DE</span></td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;height:48px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#DC2626;color:#fff;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;">DE</div>
+              Duran Enterprises
+            </td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:center;">1</td>
+            <td style="padding:0 12px;font-size:13px;font-weight:500;text-align:right;font-family:ui-monospace,monospace;">₹45.0 L</td>
+            <td style="padding:0 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;font-weight:500;width:24px;">91</span>
+                <div style="width:60px;height:4px;background:#F0EFE9;border-radius:4px;overflow:hidden;"><div style="width:91%;height:100%;background:#DC2626;border-radius:4px;"></div></div>
+              </div>
+            </td>
+            <td style="padding:0 12px;font-size:12px;font-weight:500;color:#D97706;">52 hrs</td>
+            <td style="padding:0 24px 0 12px;text-align:right;"><span style="background:#EEF2FF;color:#1A4FDB;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;">OPEN</span></td>
+          </tr>
+          
+          <tr id="child-3" class="child-row" style="display:none;border-bottom:1px solid #E5E4DF;">
+             <td colspan="8" style="padding:16px 24px 16px 48px;">
+               <div style="background:#fff;border:1px solid #E5E4DF;border-radius:8px;padding:16px;">
+                 <div>
+                   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                     <span style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">Alert: Structuring / smurfing</span>
+                     <span class="mono" style="font-size:11px;color:#9B9B93;">ALT-20260220-007</span>
+                   </div>
+                   <table style="width:100%;font-size:12px;color:#3D3D3A;border-collapse:collapse;">
+                     <tr style="border-bottom:1px solid #F0EFE9;">
+                       <td class="mono" style="padding:4px 0;">TXN-CSH-301 to 309</td>
+                       <td style="padding:4px 0;color:#9B9B93;">08 Feb 2026 · 9 Sequential Cash Deposits slightly under reporting limit</td>
+                       <td style="padding:4px 0;text-align:right;font-weight:500;color:#16A34A;">+₹45.0 L</td>
+                     </tr>
+                   </table>
+                 </div>
+               </div>
+             </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

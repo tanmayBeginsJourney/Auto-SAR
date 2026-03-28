@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review & Submit (Stage 4) | CASE-20260219-ND | Defensible AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Inter', sans-serif; color: #3D3D3A; line-height: 1.6; -webkit-font-smoothing: antialiased; background: #F5F4F1; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 20px; vertical-align: middle; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: #9B9B93; }
+  
+  /* Progress Bar Styles */
+  .step-node { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; z-index: 10; flex-shrink: 0;}
+  .step-line { width: 1px; background: #E5E4DF; position: absolute; top: 18px; bottom: -8px; left: 9.5px; z-index: 5; }
+  .step-node.completed { background: #16A34A; color: #fff; border: 1px solid #16A34A; }
+  .step-node.active { background: #1A4FDB; color: #fff; box-shadow: 0 0 0 4px #EEF2FF; border: 1px solid #1A4FDB;}
+  .step-node.pending { background: #F5F4F1; color: #9B9B93; border: 1px solid #E5E4DF;}
+  .step-text.active { color: #3D3D3A; font-weight: 500;}
+  .step-text.pending { color: #9B9B93; }
+  .step-text.completed { color: #16A34A; }
+</style>
+</head>
+<body class="min-h-screen flex">
+
+<aside style="width:240px;background:#FFFFFF;border-right:1px solid #E5E4DF;" class="fixed left-0 top-0 h-full flex flex-col py-6 z-50 overflow-y-auto">
+  <div class="px-6 mb-6">
+    <div class="flex items-center gap-2">
+      <div style="width:28px;height:28px;background:#1A4FDB;border-radius:6px;" class="flex items-center justify-center">
+        <span class="material-symbols-outlined text-white" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">shield</span>
+      </div>
+      <div style="font-size:15px;font-weight:500;color:#1A4FDB;letter-spacing:-0.02em;">Defensible AI</div>
+    </div>
+    <div style="height:1px;background:#E5E4DF;margin-top:16px;"></div>
+  </div>
+  
+  <nav class="px-3 space-y-0.5 mb-8">
+    <a href="02_principalofficerdashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">grid_view</span>Dashboard
+    </a>
+    <a href="01_casequeuedashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#1A4FDB;font-size:14px;font-weight:500;background:#EEF2FF;">
+      <span class="material-symbols-outlined" style="color:#1A4FDB;">folder_open</span>Cases
+    </a>
+    <div style="height:1px;background:#E5E4DF;margin:12px 0;"></div>
+    <a href="#" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">settings</span>Settings
+    </a>
+  </nav>
+
+  <div class="px-4 mb-4">
+    <h4 style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px;padding-left:8px;">Case Filing Progress</h4>
+    <div class="space-y-0">
+      
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line" style="background:#16A34A;"></div>
+        <div class="step-node completed">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span>
+        </div>
+        <div class="step-text completed">
+          <div style="font-size:13px; font-weight:500;">Gather Subject Profile</div>
+          <div style="font-size:11px;color:#16A34A;margin-top:1px;">Assembled ABCD****43</div>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line" style="background:#16A34A;"></div>
+        <div class="step-node completed">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span>
+        </div>
+        <div class="step-text completed">
+          <div style="font-size:13px; font-weight:500;">STR Form Autofill</div>
+          <div style="font-size:11px;color:#16A34A;margin-top:1px;">Parts 1, 2, 3, 4, 6, 8 mapped</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line" style="background:#16A34A;"></div>
+        <div class="step-node completed">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span>
+        </div>
+        <div class="step-text completed">
+          <div style="font-size:13px; font-weight:500;">Grounds of Suspicion</div>
+          <div style="font-size:11px;color:#16A34A;margin-top:1px;">Narrative saved</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;position:relative;">
+        <div class="step-node active">4</div>
+        <div class="step-text active">
+          <div style="font-size:13px;">Review & Submit</div>
+          <div style="font-size:11px;margin-top:1px;">Pre-submission validation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main style="margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;">
+
+  <header style="height:60px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #E5E4DF;position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#9B9B93;">
+      <a href="01_casequeuedashboard.html" style="text-decoration:none;color:#9B9B93;">Cases</a>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span class="mono" style="font-size:12px;">CASE-20260219-ND</span>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span style="color:#3D3D3A;font-weight:500;">Review & Submit</span>
+    </div>
+  </header>
+
+  <div style="background:#fff;border-bottom:1px solid #E5E4DF;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="mono">CASE-20260219-ND</span>
+      <span style="font-size:15px;font-weight:500;color:#3D3D3A;">Noureddine Darib</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="display:flex;align-items:center;gap:6px;background:#FEF3C7;color:#D97706;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;">
+        <span class="material-symbols-outlined" style="font-size:14px;color:#D97706;">lock</span>PII Masking Active
+      </span>
+      <div style="height:20px;width:1px;background:#E5E4DF;"></div>
+      <span class="material-symbols-outlined" style="color:#DC2626;font-size:18px;">schedule</span>
+      <span style="font-size:14px;font-weight:500;color:#DC2626;">17 hrs 34 min SLA</span>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;justify-content:center;padding:40px 24px;">
+    <div style="width:100%;max-width:800px;">
+      
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.02);overflow:hidden;">
+        
+        <div style="padding:24px;border-bottom:1px solid #E5E4DF;background:#FAFAF8;display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;background:#EEF2FF;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <span class="material-symbols-outlined" style="color:#1A4FDB;font-size:24px;">fact_check</span>
+          </div>
+          <div>
+            <h1 style="font-size:16px;font-weight:500;color:#3D3D3A;margin:0;">Pre-submission Validation</h1>
+            <p style="font-size:12px;color:#9B9B93;margin:2px 0 0;">Automated checks against FIU-IND regulatory requirements</p>
+          </div>
+        </div>
+
+        <div style="padding:8px 0;">
+          
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid #F0EFE9;">
+            <span class="material-symbols-outlined" style="color:#16A34A;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#3D3D3A;"><strong>Stage 1:</strong> Subject profile assembled and adverse media verified</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid #F0EFE9;">
+            <span class="material-symbols-outlined" style="color:#16A34A;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#3D3D3A;"><strong>Stage 2:</strong> FIU-IND SBA form parts (1, 2, 3, 4, 6, 8) successfully autofilled</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid #F0EFE9;">
+            <span class="material-symbols-outlined" style="color:#16A34A;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#3D3D3A;"><strong>Stage 3:</strong> Grounds of Suspicion narrative completed (Word count: 412)</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid #F0EFE9;">
+            <span class="material-symbols-outlined" style="color:#16A34A;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#3D3D3A;">AI Risk-wise features linked to filing — immutable audit trail active</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;border-bottom:1px solid #F0EFE9;">
+            <span class="material-symbols-outlined" style="color:#D97706;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#D97706;font-weight:500;">SLA Deadline: 17 hrs 34 min remaining</span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 24px;">
+            <span class="material-symbols-outlined" style="color:#16A34A;font-variation-settings:'FILL' 1;">check_circle</span>
+            <span style="font-size:14px;color:#3D3D3A;">Analyst RBAC verified — submission will route directly to Principal Officer</span>
+          </div>
+
+        </div>
+
+        <div style="padding:16px 24px;border-top:1px solid #E5E4DF;background:#FAFAF8;">
+          <p style="font-size:12px;color:#9B9B93;margin:0;">All items must show green before submission. The narrative and mapped form data will be locked for editing after submission to the Principal Officer.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #E5E4DF;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:30;">
+    <a href="04_caseworkspace_sargeneration.html" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #E5E4DF;color:#3D3D3A;padding:0 20px;height:36px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;font-family:Inter,sans-serif;">
+      ← Back to editor
+    </a>
+    <a href="06_submissionconfirmed.html" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1A4FDB 0%,#0038b1 100%);color:#fff;padding:0 24px;height:36px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+      Submit to Principal Officer
+    </a>
+  </div>
+
+</main>
+
+</body>
+</html>

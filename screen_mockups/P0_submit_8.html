@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Case Approved — FIU Export Ready | Defensible AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; color: #3D3D3A; line-height: 1.6; -webkit-font-smoothing: antialiased; background: #F5F4F1; min-height: 100vh; display: flex; overflow-x: hidden; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 20px; vertical-align: middle; line-height: 1; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: #9B9B93; }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; } 
+  ::-webkit-scrollbar-track { background: transparent; } 
+  ::-webkit-scrollbar-thumb { background: #E5E4DF; border-radius: 3px; }
+
+  /* Audit Trail Styles */
+  .audit-event { display: flex; align-items: flex-start; gap: 16px; position: relative; z-index: 1; margin-bottom: 24px; }
+  .audit-event:last-child { margin-bottom: 0; }
+  .audit-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #fff; margin-top: 2px; flex-shrink: 0; }
+  .hash-chip { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: #9B9B93; background: #F5F4F1; padding: 2px 6px; border-radius: 4px; margin-top: 6px; display: inline-block; }
+
+  /* Progress Bar Styles */
+  .step-node { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; z-index: 10; flex-shrink: 0;}
+  .step-line { width: 1px; background: #E5E4DF; position: absolute; top: 18px; bottom: -8px; left: 9.5px; z-index: 5; }
+  .step-node.completed { background: #16A34A; color: #fff; border: 1px solid #16A34A; }
+  .step-text.completed { color: #16A34A; }
+</style>
+</head>
+<body>
+
+<aside style="width:240px;background:#FFFFFF;border-right:1px solid #E5E4DF;height:100vh;display:flex;flex-direction:column;padding:24px 0;z-index:50;flex-shrink:0;position:fixed;left:0;top:0;">
+  <div style="padding:0 24px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;background:#1A4FDB;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined" style="color:#fff;font-size:16px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">shield</span>
+      </div>
+      <span style="font-size:15px;font-weight:500;color:#1A4FDB;letter-spacing:-0.02em;">Defensible AI</span>
+    </div>
+    <div style="height:1px;background:#E5E4DF;margin-top:16px;"></div>
+  </div>
+  
+  <nav style="flex:1;padding:0 12px;overflow-y:auto;">
+    <a href="02_principalofficerdashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">grid_view</span>Dashboard
+    </a>
+    <a href="01_analystdashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;text-decoration:none;color:#1A4FDB;font-size:14px;font-weight:500;background:#EEF2FF;border-radius:6px;margin-top:2px;">
+      <span class="material-symbols-outlined" style="color:#1A4FDB;">folder_open</span>Cases
+    </a>
+    <div style="height:1px;background:#E5E4DF;margin:12px 0;"></div>
+    <a href="#" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;margin-top:2px;">
+      <span class="material-symbols-outlined" style="color:#9B9B93;">settings</span>Settings
+    </a>
+
+    <div class="px-2 mt-8 mb-4">
+      <h4 style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px;">Case Filing Progress</h4>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+          <div class="step-line" style="background:#16A34A;"></div>
+          <div class="step-node completed"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span></div>
+          <div class="step-text completed"><div style="font-size:13px; font-weight:500;">Gather Subject Profile</div></div>
+        </div>
+        <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+          <div class="step-line" style="background:#16A34A;"></div>
+          <div class="step-node completed"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span></div>
+          <div class="step-text completed"><div style="font-size:13px; font-weight:500;">STR Form Autofill</div></div>
+        </div>
+        <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+          <div class="step-line" style="background:#16A34A;"></div>
+          <div class="step-node completed"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span></div>
+          <div class="step-text completed"><div style="font-size:13px; font-weight:500;">Grounds of Suspicion</div></div>
+        </div>
+        <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+          <div class="step-line" style="background:#16A34A;"></div>
+          <div class="step-node completed"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span></div>
+          <div class="step-text completed"><div style="font-size:13px; font-weight:500;">Review & Submit</div></div>
+        </div>
+        <div style="display:flex;gap:12px;position:relative;">
+          <div class="step-node completed"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span></div>
+          <div class="step-text completed">
+            <div style="font-size:13px; font-weight:500;">PO Review</div>
+            <div style="font-size:11px;margin-top:1px;">Approved & Exported</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div style="padding:0 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:#0D5C2F;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;">RK</div>
+      <div>
+        <div style="font-size:14px;font-weight:500;color:#3D3D3A;">Rajesh Kumar</div>
+        <div style="font-size:12px;color:#9B9B93;">Principal Officer</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main style="margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;">
+
+  <header style="height:60px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #E5E4DF;position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#9B9B93;">
+      <a href="01_analystdashboard.html" style="text-decoration:none;color:#9B9B93;">Cases</a>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span class="mono" style="color:#9B9B93;font-size:12px;">CASE-20260219-ND</span>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span style="color:#1A4FDB;font-weight:500;">Export &amp; Audit Commit</span>
+    </div>
+    <div style="position:relative;width:300px;">
+      <span class="material-symbols-outlined" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9B9B93;font-size:18px;">search</span>
+      <input type="text" placeholder="Search cases, customers..." style="width:100%;height:34px;padding:0 12px 0 36px;background:#F5F4F1;border:none;border-radius:6px;font-size:13px;outline:none;font-family:Inter,sans-serif;"/>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button style="background:none;border:none;cursor:pointer;position:relative;">
+        <span class="material-symbols-outlined" style="color:#9B9B93;">notifications</span>
+      </button>
+    </div>
+  </header>
+
+  <div style="padding:32px 32px 80px;display:flex;flex-direction:column;gap:24px;max-width:1200px;width:100%;margin:0 auto;">
+
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:24px;display:flex;align-items:center;gap:20px;">
+      <div style="width:56px;height:56px;border-radius:50%;background:#16A34A;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,163,74,0.2);">
+        <span class="material-symbols-outlined" style="color:#fff;font-size:32px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">verified</span>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:600;color:#15803D;margin-bottom:4px;">Case Approved &amp; Locked by Principal Officer</div>
+        <div style="font-size:13px;color:#166534;">Approved by Rajesh Kumar (EMP-0041) · 27 Mar 2026, 14:52 IST · <span class="mono" style="color:#166534;background:#DCFCE7;padding:2px 6px;border-radius:4px;">REF-20260327-ALT-001</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #BBF7D0;padding:8px 16px;border-radius:6px;">
+        <span class="material-symbols-outlined" style="color:#16A34A;font-size:18px;">schedule</span>
+        <span style="font-size:13px;font-weight:500;color:#16A34A;">SLA Met: 16 hrs 48 min remaining</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:20px 24px;border-bottom:1px solid #F0EFE9;background:#FAFAF8;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-outlined" style="color:#1A4FDB;font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">upload_file</span>
+            <h2 style="font-size:16px;font-weight:600;color:#3D3D3A;">FIU Portal Export</h2>
+          </div>
+          <p style="font-size:13px;color:#9B9B93;margin-top:4px;">FIU-IND XML batch ready for regulatory submission</p>
+        </div>
+        
+        <div style="padding:24px;flex:1;display:flex;flex-direction:column;">
+
+          <div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:8px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+            <span class="material-symbols-outlined" style="color:#1A4FDB;font-size:36px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">code_blocks</span>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#1e3a8a;">STR_SBA_CASE-20260219-ND_v1.xml</div>
+              <div style="font-size:12px;color:#4F46E5;margin-top:4px;">14.2 KB · Generated 27 Mar 2026, 14:52 IST</div>
+            </div>
+            <button style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1A4FDB 0%,#0038b1 100%);color:#fff;padding:0 16px;height:36px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;font-family:Inter,sans-serif;box-shadow:0 2px 4px rgba(26,79,219,0.2);">
+              <span class="material-symbols-outlined" style="font-size:16px;color:#fff;">download</span>Download XML
+            </button>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0;margin-bottom:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EFE9;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">Schema version</span>
+              <span style="color:#3D3D3A;font-size:13px;">FIU XML Schema (2024 mandate)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EFE9;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">STR type</span>
+              <span style="color:#3D3D3A;font-size:13px;">SBA — Suspicious Behaviour Alert</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EFE9;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">Reporting entity</span>
+              <span style="color:#3D3D3A;font-size:13px;">Defensible Banking Corp (BSR: 0090041)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EFE9;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">Transaction amount</span>
+              <span style="color:#3D3D3A;font-size:13px;font-weight:600;">₹3,84,00,000</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EFE9;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">Parts completed</span>
+              <span style="color:#16A34A;font-size:13px;font-weight:600;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:14px;">check_circle</span> Parts 1–4, 6–8
+              </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+              <span style="color:#9B9B93;font-size:13px;font-weight:500;">File integrity (SHA-256)</span>
+              <span class="mono" style="font-size:12px;background:#F5F4F1;padding:2px 6px;border-radius:4px;">e4d2b1…f9a3c7</span>
+            </div>
+          </div>
+
+          <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:8px;padding:16px;display:flex;align-items:center;gap:12px;margin-top:auto;margin-bottom:24px;">
+            <span class="material-symbols-outlined" style="color:#DC2626;font-size:28px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">picture_as_pdf</span>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#3D3D3A;">Internal Audit Dossier (PDF)</div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Complete case record incl. AI Risk-wise features · 2.1 MB</div>
+            </div>
+            <button style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #E5E4DF;color:#3D3D3A;padding:0 16px;height:32px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif;transition:background 0.2s;" onmouseover="this.style.background='#FAFAF8'" onmouseout="this.style.background='#fff'">
+              <span class="material-symbols-outlined" style="font-size:14px;">download</span>Save PDF
+            </button>
+          </div>
+
+          <button style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#1A1A18;color:#fff;height:44px;border-radius:6px;font-size:14px;font-weight:500;border:none;cursor:pointer;font-family:Inter,sans-serif;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#fff;">open_in_new</span>
+            Upload directly to FIU portal →
+          </button>
+          <p style="font-size:12px;color:#9B9B93;text-align:center;margin-top:12px;">Opens the FIU portal in a new tab with pre-filled XML</p>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #E5E4DF;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="padding:20px 24px;border-bottom:1px solid #F0EFE9;background:#FAFAF8;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-outlined" style="color:#1A4FDB;font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">receipt_long</span>
+            <h2 style="font-size:16px;font-weight:600;color:#3D3D3A;">Immutable Audit Ledger</h2>
+          </div>
+          <p style="font-size:13px;color:#9B9B93;margin-top:4px;">Cryptographically hashed · Tamper-evident record of actions</p>
+        </div>
+        
+        <div style="padding:24px;flex:1;overflow-y:auto;position:relative;">
+          
+          <div style="position:absolute;left:31px;top:28px;bottom:24px;width:2px;background:#E5E4DF;z-index:0;"></div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#E5E4DF;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#3D3D3A;">Data gathered &amp; Parts 1,2,3,4,6,8 mapped by <strong style="color:#1A1A18;">System</strong></div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">19 Feb 2026, 09:12 AM</div>
+              <span class="hash-chip">Hash: a3f92c</span>
+            </div>
+          </div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#E5E4DF;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#3D3D3A;">AI Risk-wise features computed by <strong style="color:#1A1A18;">System</strong></div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">19 Feb 2026, 09:14 AM · Score: 87/100</div>
+              <span class="hash-chip">Hash: 5e1f84</span>
+            </div>
+          </div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#E5E4DF;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#3D3D3A;">Part 7 Narrative generated via <strong style="color:#1A1A18;">Llama 3.1 8B</strong></div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">27 Mar 2026, 13:20 IST · 47s generation time</div>
+              <span class="hash-chip">Hash: 1d5c70</span>
+            </div>
+          </div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#E5E4DF;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#3D3D3A;">Analyst edits — 3 tracked changes</div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Priya Sharma (EMP-2847) · 27 Mar 2026, 13:55 IST</div>
+              <span class="hash-chip">Hash: 8b3e15</span>
+            </div>
+          </div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#E5E4DF;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#3D3D3A;">Submitted to PO queue</div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Priya Sharma (EMP-2847) · 27 Mar 2026, 14:07 IST</div>
+              <span class="hash-chip">Hash: f8a11b</span>
+            </div>
+          </div>
+
+          <div class="audit-event">
+            <div class="audit-dot" style="background:#1A4FDB;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:#1A4FDB;">PO approval signature committed</div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Rajesh Kumar (EMP-0041) · 27 Mar 2026, 14:52 IST</div>
+              <span class="hash-chip">Hash: f1c83b</span>
+            </div>
+          </div>
+
+          <div class="audit-event" style="margin-bottom:0;">
+            <div class="audit-dot" style="background:#16A34A;border-color:#DCFCE7;"></div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:#16A34A;">FIU XML export SHA-256 committed</div>
+              <div style="font-size:12px;color:#9B9B93;margin-top:2px;">Final export hash · Ledger securely sealed</div>
+              <span class="hash-chip" style="color:#15803D;background:#DCFCE7;">SHA-256: e4d2b1…f9a3c7</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="padding:16px 24px;border-top:1px solid #F0EFE9;background:#FAFAF8;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:12px;color:#9B9B93;font-weight:500;">7 events · Ledger sealed 27 Mar 2026</div>
+          <button style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #E5E4DF;color:#3D3D3A;padding:0 14px;height:32px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif;transition:background 0.2s;" onmouseover="this.style.background='#F5F4F1'" onmouseout="this.style.background='#fff'">
+            <span class="material-symbols-outlined" style="font-size:14px;">download</span>Export full JSON
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;justify-content:flex-start;">
+      <a href="01_analystdashboard.html" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #E5E4DF;color:#3D3D3A;padding:0 24px;height:40px;border-radius:6px;font-size:14px;font-weight:500;text-decoration:none;transition:border 0.2s;" onmouseover="this.style.borderColor='#9B9B93'" onmouseout="this.style.borderColor='#E5E4DF'">
+        ← Return to cases dashboard
+      </a>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

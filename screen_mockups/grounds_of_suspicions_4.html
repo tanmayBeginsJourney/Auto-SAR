@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Grounds of Suspicion (Stage 3) | CASE-20260219-ND | Defensible AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Inter', sans-serif; color: #3D3D3A; line-height: 1.6; -webkit-font-smoothing: antialiased; background: #F5F4F1; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 20px; vertical-align: middle; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: #9B9B93; }
+  .pii-mask { font-family: ui-monospace, monospace; background:#F0EFE9; padding:2px 6px; border-radius:4px; font-size:12px; color:#73736F;}
+  .editor-text { font-size:14px; color:#3D3D3A; line-height:1.7; outline:none; }
+  
+  /* Tabs */
+  .tab-active { color: #1A4FDB; border-bottom: 2px solid #1A4FDB; }
+  .tab-inactive { color: #9B9B93; border-bottom: 2px solid transparent; }
+  
+  /* Tooltip for highlighted sentence */
+  .highlighted-sentence { 
+    border-bottom: 2px solid #1A4FDB; 
+    cursor: help; 
+    position: relative; 
+    background: linear-gradient(180deg, transparent 60%, #EEF2FF 40%); 
+    display: inline;
+  }
+  .highlighted-sentence .tooltip {
+    visibility: hidden;
+    width: 260px;
+    background-color: #1A1A18;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px 12px;
+    position: absolute;
+    z-index: 50;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.2s, bottom 0.2s;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 400;
+  }
+  .highlighted-sentence .tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #1A1A18 transparent transparent transparent;
+  }
+  .highlighted-sentence:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+    bottom: 120%;
+  }
+  
+  /* Progress Bar Styles */
+  .step-node { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; z-index: 10; flex-shrink: 0;}
+  .step-line { width: 1px; background: #E5E4DF; position: absolute; top: 18px; bottom: -8px; left: 9.5px; z-index: 5; }
+  .step-node.completed { background: #16A34A; color: #fff; border: 1px solid #16A34A; }
+  .step-node.active { background: #1A4FDB; color: #fff; box-shadow: 0 0 0 4px #EEF2FF; border: 1px solid #1A4FDB;}
+  .step-node.pending { background: #F5F4F1; color: #9B9B93; border: 1px solid #E5E4DF;}
+  .step-text.active { color: #3D3D3A; font-weight: 500;}
+  .step-text.pending { color: #9B9B93; }
+  .step-text.completed { color: #16A34A; }
+</style>
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => {
+      el.classList.remove('tab-active');
+      el.classList.add('tab-inactive');
+    });
+    document.getElementById('content-' + tabId).style.display = 'block';
+    document.getElementById('btn-' + tabId).classList.add('tab-active');
+    document.getElementById('btn-' + tabId).classList.remove('tab-inactive');
+  }
+</script>
+</head>
+<body class="min-h-screen flex">
+
+<aside style="width:240px;background:#FFFFFF;border-right:1px solid #E5E4DF;" class="fixed left-0 top-0 h-full flex flex-col py-6 z-50 overflow-y-auto">
+  <div class="px-6 mb-6">
+    <div class="flex items-center gap-2">
+      <div style="width:28px;height:28px;background:#1A4FDB;border-radius:6px;" class="flex items-center justify-center">
+        <span class="material-symbols-outlined text-white" style="font-size:16px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">shield</span>
+      </div>
+      <div style="font-size:15px;font-weight:500;color:#1A4FDB;letter-spacing:-0.02em;">Defensible AI</div>
+    </div>
+    <div style="height:1px;background:#E5E4DF;margin-top:16px;"></div>
+  </div>
+  
+  <nav class="px-3 space-y-0.5 mb-8">
+    <a href="02_principalofficerdashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">grid_view</span>Dashboard
+    </a>
+    <a href="01_casequeuedashboard.html" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#1A4FDB;font-size:14px;font-weight:500;background:#EEF2FF;">
+      <span class="material-symbols-outlined" style="color:#1A4FDB;">folder_open</span>Cases
+    </a>
+    <div style="height:1px;background:#E5E4DF;margin:12px 0;"></div>
+    <a href="#" style="display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;text-decoration:none;color:#9B9B93;font-size:14px;font-weight:500;">
+      <span class="material-symbols-outlined">settings</span>Settings
+    </a>
+  </nav>
+
+  <div class="px-4 mb-4">
+    <h4 style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px;padding-left:8px;">Case Filing Progress</h4>
+    <div class="space-y-0">
+      
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line" style="background:#16A34A;"></div>
+        <div class="step-node completed">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span>
+        </div>
+        <div class="step-text completed">
+          <div style="font-size:13px; font-weight:500;">Gather Subject Profile</div>
+          <div style="font-size:11px;color:#16A34A;margin-top:1px;">Assembled ABCD****43</div>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line" style="background:#16A34A;"></div>
+        <div class="step-node completed">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#fff;">check</span>
+        </div>
+        <div class="step-text completed">
+          <div style="font-size:13px; font-weight:500;">STR Form Autofill</div>
+          <div style="font-size:11px;color:#16A34A;margin-top:1px;">Parts 1, 2, 3, 4, 6, 8 mapped</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;position:relative;padding-bottom:20px;">
+        <div class="step-line"></div>
+        <div class="step-node active">3</div>
+        <div class="step-text active">
+          <div style="font-size:13px;">Grounds of Suspicion</div>
+          <div style="font-size:11px;margin-top:1px;">AI Narrative Generation & Editing</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;position:relative;">
+        <div class="step-node pending">4</div>
+        <div class="step-text pending">
+          <div style="font-size:13px;">Review & Submit</div>
+          <div style="font-size:11px;margin-top:1px;">Pre-submission validation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main style="margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;">
+
+  <header style="height:60px;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid #E5E4DF;position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 24px;">
+    <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#9B9B93;">
+      <a href="01_casequeuedashboard.html" style="text-decoration:none;color:#9B9B93;">Cases</a>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span class="mono" style="font-size:12px;">CASE-20260219-ND</span>
+      <span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span>
+      <span style="color:#3D3D3A;font-weight:500;">Grounds of Suspicion</span>
+    </div>
+  </header>
+
+  <div style="background:#fff;border-bottom:1px solid #E5E4DF;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="mono">CASE-20260219-ND</span>
+      <span style="font-size:15px;font-weight:500;color:#3D3D3A;">Noureddine Darib</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="display:flex;align-items:center;gap:6px;background:#FEF3C7;color:#D97706;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;">
+        <span class="material-symbols-outlined" style="font-size:14px;color:#D97706;">lock</span>PII Masking Active
+      </span>
+      <div style="height:20px;width:1px;background:#E5E4DF;"></div>
+      <span class="material-symbols-outlined" style="color:#DC2626;font-size:18px;">schedule</span>
+      <span style="font-size:14px;font-weight:500;color:#DC2626;">17 hrs 51 min SLA</span>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;overflow:hidden;padding:16px;gap:12px;background:#F5F4F1;">
+
+    <div style="width:480px;flex-shrink:0;background:#fff;border:1px solid #E5E4DF;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;">
+      
+      <div style="display:flex;border-bottom:1px solid #E5E4DF;padding:0 16px;overflow-x:auto;scrollbar-width:none;">
+        <button id="btn-summary" onclick="switchTab('summary')" class="tab-btn tab-active" style="padding:12px 0;margin-right:20px;font-size:13px;font-weight:500;background:none;border-top:none;border-left:none;border-right:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">Summary & Risk</button>
+        <button id="btn-kyc" onclick="switchTab('kyc')" class="tab-btn tab-inactive" style="padding:12px 0;margin-right:20px;font-size:13px;font-weight:500;background:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">KYC Profile</button>
+        <button id="btn-txn" onclick="switchTab('txn')" class="tab-btn tab-inactive" style="padding:12px 0;margin-right:20px;font-size:13px;font-weight:500;background:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">Transactions</button>
+        <button id="btn-alerts" onclick="switchTab('alerts')" class="tab-btn tab-inactive" style="padding:12px 0;margin-right:20px;font-size:13px;font-weight:500;background:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">Prior Alerts</button>
+        <button id="btn-media" onclick="switchTab('media')" class="tab-btn tab-inactive" style="padding:12px 0;font-size:13px;font-weight:500;background:none;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">Adverse Media</button>
+      </div>
+
+      <div id="content-summary" class="tab-content" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+        
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:8px;padding:16px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">list_alt</span> Case Fact Summary
+          </div>
+          <ul style="margin:0;padding-left:16px;font-size:13px;color:#3D3D3A;line-height:1.6;display:flex;flex-direction:column;gap:8px;">
+            <li><strong>Subject:</strong> High-Risk Trader. Income declared at ₹40L–₹50L p.a.</li>
+            <li><strong>Alerts (3):</strong> High-velocity pass-through, PEP Adjacency, Cross-border discrepancy.</li>
+            <li><strong>Transactions:</strong> 23 inward wires (Total ₹3.84 Cr) over 14 days from unverified originators.</li>
+            <li><strong>Outward flow:</strong> Immediate RTGS sweeps to HK and SG beneficiary corporates.</li>
+            <li><strong>Adverse Media:</strong> Confirmed match — UAE FIU pending investigation.</li>
+            <li><strong>Prior Alerts:</strong> 1 (Closed — Structuring).</li>
+          </ul>
+        </div>
+
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:8px;padding:16px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px;display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">query_stats</span> AI Risk-wise Features
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:#3D3D3A;font-weight:500;">Velocity of fund sweeps</span>
+                <span style="font-size:13px;font-weight:500;color:#DC2626;">45%</span>
+              </div>
+              <div style="width:100%;height:6px;background:#E5E4DF;border-radius:4px;overflow:hidden;">
+                <div style="width:45%;height:100%;background:#DC2626;border-radius:4px;"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:#3D3D3A;">Unique originator count</span>
+                <span style="font-size:13px;font-weight:500;color:#D97706;">30%</span>
+              </div>
+              <div style="width:100%;height:6px;background:#E5E4DF;border-radius:4px;overflow:hidden;">
+                <div style="width:30%;height:100%;background:#D97706;border-radius:4px;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="font-size:13px;color:#3D3D3A;">Cross-border ratio</span>
+                <span style="font-size:13px;font-weight:500;color:#D97706;">25%</span>
+              </div>
+              <div style="width:100%;height:6px;background:#E5E4DF;border-radius:4px;overflow:hidden;">
+                <div style="width:25%;height:100%;background:#D97706;border-radius:4px;"></div>
+              </div>
+            </div>
+            
+            <div style="border-top:1px solid #E5E4DF;margin-top:8px;padding-top:16px;">
+              <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Matched Typologies</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <span style="background:#EEF2FF;color:#1A4FDB;font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;">→ Pass-through accounts</span>
+                <span style="background:#EEF2FF;color:#1A4FDB;font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;">→ Cross-border layering</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="content-kyc" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+        <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Subject Details</div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Customer Name</span>
+          <span style="font-size:14px;color:#3D3D3A;font-weight:500;">Noureddine Darib</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Customer ID / PAN</span>
+          <span class="pii-mask">ABC****89Z</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Occupation</span>
+          <span style="font-size:14px;color:#3D3D3A;">Import/Export Trader</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Declared Income Slab</span>
+          <span style="font-size:14px;color:#3D3D3A;">₹40L - ₹50L p.a.</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Source of Funds</span>
+          <span style="font-size:14px;color:#3D3D3A;">Trade receivables</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Risk Tier</span>
+          <span style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">HIGH</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Last CDD Refresh</span>
+          <span style="font-size:14px;color:#3D3D3A;">14 Jan 2026</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Watchlist</span>
+          <span style="font-size:14px;color:#16A34A;font-weight:500;">Clear</span>
+        </div>
+
+        <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin:24px 0 12px;">Account Links</div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Primary Savings</span>
+          <span class="pii-mask">**** 4492</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Corporate Current</span>
+          <span class="pii-mask">**** 8821</span>
+        </div>
+        <div style="border-bottom:1px solid #F0EFE9;height:36px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:#9B9B93;">Account Vintage</span>
+          <span style="font-size:14px;color:#3D3D3A;">8 yrs 3 months</span>
+        </div>
+      </div>
+
+      <div id="content-txn" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+        <div style="font-size:12px;color:#9B9B93;margin-bottom:12px;">Top flagged transactions for this case.</div>
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:6px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+             <div class="mono" style="font-size:12px;color:#3D3D3A;">TXN-IN-8842</div>
+             <div style="font-size:11px;color:#9B9B93;">01 Feb 2026 · Wire</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px;font-weight:500;color:#16A34A;">+₹16.5 L</div>
+            <div style="font-size:11px;color:#9B9B93;">From UAE</div>
+          </div>
+        </div>
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:6px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+             <div class="mono" style="font-size:12px;color:#3D3D3A;">TXN-OUT-442</div>
+             <div style="font-size:11px;color:#9B9B93;">02 Feb 2026 · RTGS</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px;font-weight:500;color:#DC2626;">-₹34.5 L</div>
+            <div style="font-size:11px;color:#9B9B93;">To HK</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="content-alerts" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:6px;padding:12px;">
+           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span class="mono" style="font-size:12px;color:#3D3D3A;">ALT-20250810-112</span>
+              <span style="font-size:11px;color:#9B9B93;">Closed</span>
+           </div>
+           <div style="font-size:12px;color:#3D3D3A;">Trigger: Structuring limits.</div>
+           <div style="font-size:11px;color:#9B9B93;margin-top:4px;">Analyst Note: Provided invoices for legitimate hardware imports.</div>
+        </div>
+      </div>
+
+      <div id="content-media" class="tab-content" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:6px;padding:12px;margin-bottom:8px;">
+           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:12px;font-weight:500;color:#3D3D3A;">WorldCheck</span>
+              <span style="background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;">Confirmed Match</span>
+           </div>
+           <div style="font-size:12px;color:#3D3D3A;">Darib, Noureddine — pending investigation UAE FIU</div>
+           <div style="font-size:11px;color:#9B9B93;margin-top:4px;">08 Jan 2026</div>
+        </div>
+        <div style="background:#FAFAF8;border:1px solid #F0EFE9;border-radius:6px;padding:12px;">
+           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:12px;font-weight:500;color:#3D3D3A;">Dow Jones</span>
+              <span style="background:#FEF3C7;color:#D97706;font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;">Likely Match</span>
+           </div>
+           <div style="font-size:12px;color:#3D3D3A;">Noureddine Darib linked to Dubai shell company inquiry</div>
+           <div style="font-size:11px;color:#9B9B93;margin-top:4px;">12 Mar 2026</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="flex:1;background:#fff;border:1px solid #E5E4DF;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;">
+      
+      <div style="background:#EEF2FF;height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #E5E4DF;flex-shrink:0;">
+        <div style="font-size:12px;color:#1A4FDB;display:flex;align-items:center;gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:14px;">auto_awesome</span>
+          AI Draft Generated (Llama 3.1 8B) · Mapped to FIU-IND Part 7
+        </div>
+        <a href="#" style="font-size:12px;color:#1A4FDB;text-decoration:none;font-weight:500;">View prompt console →</a>
+      </div>
+
+      <div style="height:40px;border-bottom:1px solid #E5E4DF;display:flex;align-items:center;padding:0 12px;gap:4px;background:#FAFAF8;flex-shrink:0;">
+        <button style="width:32px;height:32px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#3D3D3A;border-radius:4px;" onmouseover="this.style.background='#E5E4DF'" onmouseout="this.style.background='none'"><span class="material-symbols-outlined" style="font-size:18px;">format_bold</span></button>
+        <button style="width:32px;height:32px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#3D3D3A;border-radius:4px;" onmouseover="this.style.background='#E5E4DF'" onmouseout="this.style.background='none'"><span class="material-symbols-outlined" style="font-size:18px;">format_italic</span></button>
+        <button style="width:32px;height:32px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#3D3D3A;border-radius:4px;" onmouseover="this.style.background='#E5E4DF'" onmouseout="this.style.background='none'"><span class="material-symbols-outlined" style="font-size:18px;">format_underlined</span></button>
+        <div style="width:1px;height:20px;background:#E5E4DF;margin:0 8px;"></div>
+        <button style="display:flex;align-items:center;gap:4px;border:1px solid #E5E4DF;background:#fff;border-radius:4px;padding:0 8px;height:28px;font-size:12px;color:#3D3D3A;cursor:pointer;"><span class="material-symbols-outlined" style="font-size:14px;">refresh</span> Regenerate section</button>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:32px 40px;">
+        
+        <div style="margin-bottom:32px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Paragraph 1 — Customer Profile</div>
+          <div contenteditable="true" class="editor-text">
+            Noureddine Darib (PAN: <span class="pii-mask" contenteditable="false">ABC****89Z</span>) is an individual account holder classified as High Risk (KYC tier 3) operating as an Import/Export Trader. The customer declared an income slab of <span class="pii-mask" contenteditable="false">₹40L - ₹50L p.a.</span> The account has a vintage of 8 years and 3 months. While the primary watchlist screening was clear, subsequent adverse media validation confirms an active UAE FIU inquiry regarding linked shell entities.
+          </div>
+        </div>
+
+        <div style="margin-bottom:32px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Paragraph 2 — Transaction Activity</div>
+          <div contenteditable="true" class="editor-text">
+            Between 01 February 2026 and 14 February 2026, the account recorded 23 inward RTGS transfers totalling ₹3,84,00,000. These funds originated from 17 unique, unverified originators based primarily in the UAE. Notably, these cumulative inflows vastly exceed the customer's declared annual income. Upon receipt, the funds were immediately swept outward via RTGS transfers to beneficiary corporate accounts situated in Hong Kong and Singapore, leaving a near-zero residual balance.
+          </div>
+        </div>
+
+        <div style="margin-bottom:40px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Paragraph 3 — Grounds of Suspicion</div>
+          <div contenteditable="true" class="editor-text">
+            The transaction pattern demonstrates a lack of economic rationale and is disproportionate to the stated business profile. 
+            
+            <span class="highlighted-sentence">The rapid inward-to-outward sweep velocity, combined with the cross-border destination pattern, is consistent with the 'Pass-through account' typology as defined in FIU-IND Advisory 2023-04.
+              <span class="tooltip" contenteditable="false"><strong>Primary Risk Driver:</strong><br/>Velocity of fund sweeps (45%)<br/>Cross-border ratio (25%)</span>
+            </span> 
+            
+            Furthermore, the high count of unique originators presenting PEP adjacency risk, paired with confirmed adverse media regarding UAE FIU investigations, elevates the suspicion of cross-border layering.
+          </div>
+        </div>
+
+        <div style="border-top:1px dashed #E5E4DF;padding-top:24px;">
+          <div style="font-size:11px;font-weight:500;color:#9B9B93;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Analyst Notes (Internal - Not Exported to FIU)</div>
+          <textarea style="width:100%;min-height:80px;border:1px solid #E5E4DF;border-radius:6px;padding:12px;font-size:13px;font-family:Inter,sans-serif;color:#3D3D3A;outline:none;resize:vertical;" placeholder="Add internal notes, investigation links, or handover comments here..."></textarea>
+        </div>
+
+      </div>
+
+      <div style="border-top:1px solid #E5E4DF;background:#fff;flex-shrink:0;">
+        <div style="height:36px;background:#FAFAF8;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid #F0EFE9;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:16px;color:#1A4FDB;margin-right:6px;">forum</span>
+          <span style="font-size:12px;font-weight:500;color:#3D3D3A;">AI Co-pilot</span>
+        </div>
+        <div style="padding:16px 20px;max-height:160px;overflow-y:auto;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <div style="background:#EEF2FF;padding:10px 14px;border-radius:12px 12px 0 12px;font-size:13px;color:#1A4FDB;max-width:80%;">
+              Why did you flag the cross-border transfers?
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-start;margin-bottom:12px;">
+            <div style="background:#fff;border:1px solid #E5E4DF;padding:10px 14px;border-radius:12px 12px 12px 0;font-size:13px;color:#3D3D3A;max-width:80%;line-height:1.5;">
+              The cross-border ratio accounts for <strong>25%</strong> of the risk profile. This was triggered because the destination accounts in HK and Singapore reside in FATF advisory jurisdictions, and the sweeping occurred under T+0.5 days.
+            </div>
+          </div>
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid #F0EFE9;display:flex;gap:8px;">
+          <input type="text" placeholder="Ask the co-pilot to rewrite a section or explain a flag..." style="flex:1;height:36px;border:1px solid #E5E4DF;border-radius:6px;padding:0 12px;font-size:13px;font-family:Inter,sans-serif;outline:none;"/>
+          <button style="background:#1A4FDB;color:#fff;border:none;border-radius:6px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #E5E4DF;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:30;">
+    <button style="background:#fff;border:1px solid #E5E4DF;color:#3D3D3A;padding:0 20px;height:36px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:Inter,sans-serif;">
+      Save Draft
+    </button>
+    <a href="05_presubmissionvalidation.html" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1A4FDB 0%,#0038b1 100%);color:#fff;padding:0 24px;height:36px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+      Continue to Stage 4: Review & Submit →
+    </a>
+  </div>
+
+</main>
+
+</body>
+</html>
