@@ -1,47 +1,71 @@
 ## SAR Demo Dataset
 
-This folder contains a compact, derived dataset for SAR/STR narrative generation.
+This folder now contains two layers:
 
-### Source files referenced
+- the original CSV-style SAR demo sources
+- a new minimal relational demo build for frontend and SQLite use
 
-- `HI-Small_Trans.csv`: primary structural reference for the transaction file.
-- `accounts.csv`: reference for account/customer style and account-level metadata patterns.
-- `alerts.csv`: reference for suspicious flow motifs such as fan-in and rapid movement.
+The minimal build keeps transactions dense enough for review flows, but keeps the rest of the master data intentionally small.
 
-### Files created
+## Minimal Relational Build
 
-- `transactions_single_bank.csv`: 50 transactions total, with 21 suspicious and 29 non-suspicious rows.
-- `bank_reference.csv`: bank and platform ID lookup for transaction-level bank codes.
-- `annexure_a_individuals.csv`: Annexure A fields for individual customers.
-- `annexure_b_entities.csv`: Annexure B fields for legal persons/entities.
-- `annexure_c_accounts.csv`: Annexure C account master with holder, related person, status, and FY totals.
-- `demo_case_customers_single_bank.csv`: 6 hand-picked demo customers for SAR narrative walkthroughs.
-- `rule_thresholds.csv`: explicit demo thresholds used in this mini dataset.
-- `rule_hits.csv`: customer-level summary of triggered scenarios and narrative pointers.
+New files added for the frontend-oriented demo:
 
-### Design choices
+- `minimal_schema.sql`: minimal SQLite schema for cases, alerts, transactions, KYC-like customer data, employees, entities, and adverse media
+- `minimal_seed.sql`: seed data for the minimal schema
+- `sar_demo_minimal.db`: ready-to-query SQLite database built from the schema and seed
+- `demo_case_examples.md`: the 3 best demo cases with alert and transaction walkthroughs
 
-- The transaction schema is based on `HI-Small_Trans.csv`, but the duplicated `Account` columns were clarified into `From Account` and `To Account`.
-- `From Bank` and `To Bank` now use numeric-style bank IDs, aligned with the source dataset convention. Use `bank_reference.csv` to resolve those IDs to bank or platform names.
-- All `AC...` accounts are modeled as accounts held with one reporting bank, `BARCLAYS_IN`.
-- The `From Bank` and `To Bank` columns now reflect a single-bank perspective:
-  - Bank ID `10` is the reporting bank, `BARCLAYS_IN`.
-  - Other bank IDs represent external banks and crypto exchange platforms.
-  - Bank ID `999001` is used for physical cash deposit and withdrawal points.
-- Currency was standardized to `INR` so the rules align with the thresholds you listed.
-- Extra columns were added to support SAR use cases: `Primary Account Number`, `Primary Customer ID`, `Counterparty Customer ID`, `Branch City`, `Channel`, `Account Status`, `Rule Tags`, and `Scenario Group`.
-- The suspicious rows are intentionally concentrated into a few coherent cases:
-- cash structuring below INR 10,00,000
-- many-to-one fund transfer
-- one-to-many fund transfer
-- dormant account reactivation with rapid cash-out
-- repeated cash deposits just below INR 50,000
-- suspicious inflow followed by transfer to crypto exchange
+### Minimal build counts
 
-### Most useful files for narrative generation
+- `customers`: 9
+- `accounts`: 9
+- `employees`: 6
+- `cases`: 3
+- `alert_rules`: 7
+- `alerts`: 8
+- `transactions`: 45
+- `entities`: 13
+- `adverse_media`: 3
 
-- Start with `demo_case_customers_single_bank.csv` to pick a case for the one-bank-view dataset.
-- Use `rule_hits.csv` to understand why the customer is suspicious.
-- Use `transactions_single_bank.csv` for chronology and transaction pattern description from the reporting bank perspective.
-- Use `bank_reference.csv` to resolve transaction bank IDs to their real-world labels.
-- Use Annexures A, B, and C for customer/entity/account details needed in the STR pack.
+### The 3 linked demo cases
+
+- `CASE001` / `IND003`: cash structuring below INR 1000000 followed by a large transfer to `ENT001`
+- `CASE002` / `ENT001`: pass-through entity account receiving the funds from `CASE001` and dispersing them to four beneficiaries
+- `CASE003` / `IND011`: suspicious inflow from `CASE002` followed by a same-day Binance transfer
+
+These 3 cases are intentionally linked so the frontend can show:
+
+- a case list
+- case detail
+- case-to-alert mapping
+- alert-to-transaction mapping
+- KYC profile information
+- adverse media
+- simple entity-style transaction visualisation
+
+## Important Scope Choice
+
+This build does **not** include any rule calculation code or threshold generation scripts.
+
+The thresholds are stored as reference data and the triggered alerts are already mapped into the database. That keeps the demo deterministic and easy to test before implementing rule logic later.
+
+## Existing Source Files Kept For Reference
+
+These earlier files are still present and were used as the source material for the minimal build:
+
+- `transactions_single_bank.csv`
+- `bank_reference.csv`
+- `annexure_a_individuals.csv`
+- `annexure_b_entities.csv`
+- `annexure_c_accounts.csv`
+- `demo_case_customers_single_bank.csv`
+- `rule_thresholds.csv`
+- `rule_hits.csv`
+
+## Suggested Starting Points
+
+- Open `demo_case_examples.md` to understand the 3 core review flows.
+- Open `sar_demo_minimal.db` if you want the frontend to query direct relational values.
+- Open `minimal_schema.sql` if you want to see the exact minimal table structure.
+- Open `minimal_seed.sql` if you want to inspect or tweak the demo rows manually.
