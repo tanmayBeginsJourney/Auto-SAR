@@ -1,0 +1,13 @@
+Bank_ID,Bank_Name,Bank_Type,Is_Reporting_Bank,Notes
+10,BARCLAYS_IN,Commercial Bank,Yes,Reporting bank for all internal AC accounts
+3208,HDFC_IN,Commercial Bank,No,External counterparty bank
+3209,ICICI_IN,Commercial Bank,No,External counterparty bank
+1420,SBI_IN,Commercial Bank,No,External counterparty bank
+1665,KOTAK_IN,Commercial Bank,No,External counterparty bank
+2439,AXIS_IN,Commercial Bank,No,External counterparty bank
+36056,YES_IN,Commercial Bank,No,External counterparty bank
+11813,PNB_IN,Commercial Bank,No,External counterparty bank
+211050,COINDCX_EXCHANGE,Crypto Exchange,No,External crypto exchange platform
+245335,BINANCE_EXCHANGE,Crypto Exchange,No,External crypto exchange platform
+13037,WAZIRX_EXCHANGE,Crypto Exchange,No,External crypto exchange platform
+999001,CASH_DESK,Cash Channel,No,Physical cash point used for branch cash deposits and withdrawals
