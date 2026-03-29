@@ -43,68 +43,86 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen bg-shell">
-      <aside className="fixed left-0 top-0 flex h-screen w-60 flex-col border-r border-line bg-white py-6">
-        <div className="px-6">
+      <aside className="fixed left-0 top-0 flex h-screen w-60 flex-col border-r border-sidebarBorder bg-sidebarBg py-7">
+        <div className="px-6 pt-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent text-sm font-semibold text-white">
-              S
-            </div>
             <div>
-              <div className="text-[15px] font-semibold tracking-[-0.02em] text-accent">Auto-SAR</div>
-              <div className="text-[11px] text-muted">Hackathon MVP</div>
+              <div className="text-[14px] font-semibold tracking-[-0.02em]">
+                <span className="text-highlight">SAR</span><span className="text-white">e</span><span className="text-success">Gamma</span>
+              </div>
+              <div className="text-[11px] text-sidebarText">2Big2Fail</div>
             </div>
           </div>
-          <div className="mt-4 h-px bg-line" />
+          <div className="mt-4 h-px bg-sidebarBorder" />
         </div>
-        <nav className="space-y-1 px-3 pt-4">
-          <Link className="flex items-center gap-3 rounded-md bg-accentSoft px-3 py-2 text-sm font-medium text-accent" to={dashboardPath}>
+        <nav className="space-y-2 px-3 pt-5">
+          <Link
+            className="mx-2 flex items-center gap-3 rounded-lg border-l-2 border-sidebarAccent bg-[rgba(0,174,239,0.12)] px-4 py-2.5 text-[13px] font-medium text-sidebarAccent"
+            to={dashboardPath}
+          >
             Dashboard
           </Link>
-          <Link className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted" to={dashboardPath}>
+          <Link
+            className="mx-2 flex items-center gap-3 rounded-lg border-l-2 border-transparent px-4 py-2.5 text-[13px] font-medium text-sidebarText"
+            to={dashboardPath}
+          >
             Cases
           </Link>
-          <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium text-muted" onClick={switchRole}>
+          <button
+            className="mx-2 flex w-[calc(100%-1rem)] items-center gap-3 rounded-lg border-l-2 border-transparent px-4 py-2.5 text-left text-[13px] font-medium text-sidebarText"
+            onClick={switchRole}
+          >
             Switch to {session?.role === 'ANALYST' ? 'PO' : 'Analyst'}
           </button>
         </nav>
         {sidebarSteps ? (
-          <div className="mt-6 px-4">
-            <div className="mb-4 px-2 text-[11px] font-medium uppercase tracking-[0.05em] text-muted">
+          <div className="mt-8">
+            <div className="mb-1 mt-4 px-4 text-[10px] font-medium uppercase tracking-[0.22em] text-sidebarBorder">
               Case Filing Progress
             </div>
-            <div className="space-y-0">
+            <div className="space-y-0 px-4">
               {sidebarSteps.map((step, index) => (
                 <div className="relative flex gap-3 pb-5 last:pb-0" key={step.label}>
                   {index < sidebarSteps.length - 1 ? (
-                    <div className={`absolute left-[9px] top-[18px] bottom-[-8px] w-px ${step.state === 'completed' ? 'bg-success' : 'bg-line'}`} />
+                    <div
+                      className={`absolute left-[9px] top-[18px] bottom-[-8px] w-px ${step.state === 'completed' ? 'bg-success' : 'bg-sidebarBorder'}`}
+                    />
                   ) : null}
                   <div
                     className={`z-10 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-medium ${
                       step.state === 'completed'
                         ? 'border border-success bg-success text-white'
                         : step.state === 'active'
-                          ? 'border border-accent bg-accent text-white shadow-[0_0_0_4px_#EEF2FF]'
-                          : 'border border-line bg-shell text-muted'
+                          ? 'border border-sidebarAccent bg-sidebarAccent text-white shadow-[0_0_0_4px_rgba(59,130,246,0.18)]'
+                          : 'border border-sidebarBorder bg-sidebarBg text-sidebarText'
                     }`}
                   >
-                    {step.state === 'completed' ? '✓' : index + 1}
+                    {step.state === 'completed' ? '\u2713' : index + 1}
                   </div>
                   <div>
-                    <div className={`text-[13px] ${step.state === 'pending' ? 'text-muted' : step.state === 'completed' ? 'font-medium text-success' : 'font-medium text-copy'}`}>
+                    <div
+                      className={`text-[13px] ${
+                        step.state === 'pending'
+                          ? 'text-sidebarText'
+                          : step.state === 'completed'
+                            ? 'font-medium text-success'
+                            : 'font-medium text-sidebarActive'
+                      }`}
+                    >
                       {step.label}
                     </div>
-                    {step.detail ? <div className="mt-1 text-[11px] text-muted">{step.detail}</div> : null}
+                    {step.detail ? <div className="mt-1 text-[11px] text-sidebarText">{step.detail}</div> : null}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         ) : null}
-        <div className="mt-auto px-3">
-          <div className="rounded-lg border border-[#F0EFE9] bg-[#FAFAF8] p-3">
-            <div className="text-sm font-medium">{session?.userName}</div>
-            <div className="text-xs text-muted">{session?.role === 'ANALYST' ? 'L1 Analyst' : 'Principal Officer'}</div>
-            <button className="mt-3 text-xs font-medium text-muted underline-offset-2 hover:underline" onClick={logout}>
+        <div className="mt-auto border-t border-sidebarBorder px-5 pt-3">
+          <div>
+            <div className="text-sm font-medium text-sidebarActive">{session?.userName}</div>
+            <div className="text-[12px] text-sidebarText">{session?.role === 'ANALYST' ? 'L1 Analyst' : 'Principal Officer'}</div>
+            <button className="mt-3 text-xs font-medium text-sidebarText underline-offset-2 hover:underline" onClick={logout}>
               Sign out
             </button>
           </div>
@@ -112,8 +130,8 @@ export function AppShell({
       </aside>
 
       <main className="ml-60 flex min-h-screen flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-15 items-center justify-between border-b border-line bg-white/90 px-6 backdrop-blur">
-          <div className="text-sm text-muted">{breadcrumb}</div>
+        <header className="sticky top-0 z-40 flex h-15 items-center justify-between border-b border-line bg-card px-6">
+          <div className="text-sm leading-6 text-muted">{breadcrumb}</div>
           <div className="flex items-center gap-4">
             {setSearch ? (
               <input

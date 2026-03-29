@@ -5,6 +5,11 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --shadow-panel: 0 2px 8px rgba(30, 42, 59, 0.07), 0 0 0 1px rgba(214, 220, 232, 0.8);
+    --shadow-tile: 0 1px 4px rgba(30, 42, 59, 0.05), 0 0 0 1px rgba(214, 228, 247, 0.9);
+  }
+
   * {
     @apply box-border;
   }
@@ -23,22 +28,132 @@
 
 @layer components {
   .panel {
-    @apply rounded-[10px] border border-line bg-card shadow-panel;
+    @apply rounded-xl border border-line bg-card;
+    box-shadow: var(--shadow-panel);
+    padding: 0;
+  }
+
+  .panel:has(> table),
+  .panel:has(> .overflow-x-auto) {
+    overflow: hidden;
+  }
+
+  .panel table thead {
+    background-color: #f0f4fa;
+  }
+
+  .panel table thead tr {
+    border-bottom: 2px solid #d6e4f7;
+  }
+
+  .panel table th {
+    color: #6b7a99;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .panel table tbody tr {
+    border-color: #edf4fc;
+  }
+
+  .panel table tbody tr:hover {
+    background-color: #edf4fc;
+  }
+
+  .panel table td {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .panel > h2 {
+    @apply border-b border-line pb-3;
   }
 
   .input {
-    @apply h-9 rounded-md border border-line bg-white px-3 text-sm text-copy outline-none transition focus:border-accent;
+    @apply h-9 rounded-lg border border-line bg-card px-3 text-sm text-copy outline-none transition;
+  }
+
+  .input:focus {
+    border-color: #00aeef;
+    box-shadow: 0 0 0 3px #e6f7fd;
   }
 
   .btn-primary {
-    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-accent bg-accent px-4 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary:hover {
+    background-color: #1544c0;
+    border-color: #1544c0;
   }
 
   .btn-secondary {
-    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-4 text-sm font-medium text-copy transition hover:bg-shell disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line bg-card px-4 text-sm font-medium text-copy transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-secondary:hover {
+    background-color: #edf4fc;
+    border-color: #00aeef;
+  }
+
+  .btn-success {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-success px-4 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-highlight {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-md bg-highlight px-4 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em];
+    @apply inline-flex items-center rounded-md px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em];
+  }
+
+  .badge-info {
+    @apply border border-highlightBorder bg-highlightSoft text-highlight;
+  }
+
+  .tile {
+    background: #ffffff;
+    border: 1px solid #d6e4f7;
+    border-radius: 10px;
+    box-shadow: var(--shadow-tile);
+    padding: 1rem 1.25rem;
+  }
+
+  .tile-cream {
+    background: #faf8f3;
+    border: 1px solid #d6dce8;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+
+  .tile-powder {
+    background: #edf4fc;
+    border: 1px solid #d6e4f7;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+}
+
+@layer utilities {
+  .section-divider {
+    border-top: 1px solid #d6dce8;
+    margin: 1.5rem 0;
+  }
+
+  .section-heading {
+    @apply text-[10px] font-medium uppercase tracking-[0.1em] text-muted;
+  }
+
+  div:has(> [data-kpi-card]) {
+    gap: 1.25rem;
+  }
+
+  .space-y-3:has(> [data-stack-card]) > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
   }
 }

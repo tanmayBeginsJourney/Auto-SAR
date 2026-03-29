@@ -99,11 +99,11 @@ export function GroundsPage() {
       title="Grounds of Suspicion"
       breadcrumb={
         <div className="flex items-center gap-2">
-          <span>Cases</span>
-          <span>›</span>
-          <span className="font-mono text-xs">{caseItem.caseId}</span>
-          <span>›</span>
-          <span className="font-medium text-copy">Grounds of Suspicion</span>
+          <span className="text-[12px] text-muted">Cases</span>
+          <span className="text-[12px] text-muted">›</span>
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">{caseItem.caseId}</span>
+          <span className="text-[12px] text-muted">›</span>
+          <span className="text-[12px] font-medium text-copy">Grounds of Suspicion</span>
         </div>
       }
       sidebarSteps={analystSteps(2)}
@@ -154,10 +154,10 @@ export function GroundsPage() {
             subtitle="Generate, edit, and selectively regenerate the grounds-of-suspicion narrative."
             action={
               <div className="flex gap-2">
-                <button className="btn-secondary" disabled={!caseItem.canAnalystEdit} onClick={generate}>
+                <button className="btn-success" disabled={!caseItem.canAnalystEdit} onClick={generate}>
                   Generate Draft
                 </button>
-                <button className="btn-secondary" disabled={!caseItem.canAnalystEdit} onClick={regenerateConclusion}>
+                <button className="btn-highlight" disabled={!caseItem.canAnalystEdit} onClick={regenerateConclusion}>
                   Regenerate conclusion
                 </button>
               </div>
@@ -171,7 +171,7 @@ export function GroundsPage() {
               onChange={(event) => setDraftText(event.target.value)}
             />
             <div className="mt-4 flex justify-end gap-3">
-              <button className="btn-secondary" disabled={!caseItem.canAnalystEdit} onClick={save}>
+              <button className="btn-success" disabled={!caseItem.canAnalystEdit} onClick={save}>
                 Save draft
               </button>
               <button className="btn-primary" disabled={!caseItem.canAnalystEdit} onClick={continueFlow}>

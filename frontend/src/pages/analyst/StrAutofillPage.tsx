@@ -65,9 +65,9 @@ export function StrAutofillPage() {
       title="STR Autofill"
       breadcrumb={
         <div className="flex items-center gap-2">
-          <span>Cases</span>
-          <span>›</span>
-          <span className="font-medium text-copy">STR Autofill</span>
+          <span className="text-[12px] text-muted">Cases</span>
+          <span className="text-[12px] text-muted">›</span>
+          <span className="text-[12px] font-medium text-copy">STR Autofill</span>
         </div>
       }
       sidebarSteps={analystSteps(1)}
@@ -139,7 +139,7 @@ export function StrAutofillPage() {
           </SectionCard>
         ))}
         <div className="flex justify-end gap-3">
-          <button className="btn-secondary" disabled={!caseQuery.data.canAnalystEdit} onClick={save}>
+          <button className="btn-success" disabled={!caseQuery.data.canAnalystEdit} onClick={save}>
             Save Draft
           </button>
           <button className="btn-primary" disabled={!caseQuery.data.canAnalystEdit} onClick={continueFlow}>
