@@ -21,16 +21,18 @@ export function LoginPage() {
   }, [])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(26,79,219,0.16),_transparent_32%),linear-gradient(180deg,#F9F8F4_0%,#F5F4F1_100%)] px-6">
+    <div
+      className="flex min-h-screen items-center justify-center px-6"
+      style={{ backgroundImage: 'linear-gradient(135deg, #F8F6F1 0%, #EDF4FC 100%)' }}
+    >
       <div className="grid w-full max-w-5xl gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[24px] border border-white/70 bg-white/70 p-10 shadow-[0_24px_64px_rgba(61,61,58,0.08)] backdrop-blur">
+        <div className="rounded-2xl border border-powder bg-card p-10 shadow-panel">
           <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-lg font-semibold text-white shadow-lg shadow-blue-200">
-              S
-            </div>
             <div>
-              <div className="text-xl font-semibold text-accent">Auto-SAR</div>
-              <div className="text-sm text-muted">SAR Narrative Generation with Audit Trail</div>
+              <div className="text-xl font-semibold text-accent">
+                <span className="text-white">SAR</span><span className="text-white">e</span><span className="text-white">Gamma</span>
+              </div>
+              <div className="text-sm text-muted">2Big2Fail</div>
             </div>
           </div>
           <h1 className="max-w-xl text-4xl font-semibold leading-tight text-copy">
@@ -46,7 +48,7 @@ export function LoginPage() {
               ['Explainable scoring', 'Risk, SLA, validation, and crypto handling all expose plain-language reasoning.'],
               ['Immutable exports', 'Approved bundles include XML, PDF dossier, ledger JSON, and persisted hashes.'],
             ].map(([title, body]) => (
-              <div className="rounded-2xl border border-line bg-[#FAFAF8] p-4" key={title}>
+              <div className="tile-cream" key={title}>
                 <div className="text-sm font-semibold text-copy">{title}</div>
                 <div className="mt-2 text-xs leading-6 text-muted">{body}</div>
               </div>
@@ -54,13 +56,13 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="panel self-center p-8">
+        <div className="self-center rounded-2xl border border-line bg-card p-8 shadow-panel">
           <div className="text-lg font-semibold">Choose a seeded demo role</div>
           <p className="mt-2 text-sm text-muted">Routes and actions are protected. You can switch later from the sidebar.</p>
           {error ? <div className="mt-6 rounded-lg bg-red-50 p-4 text-sm text-danger">{error}</div> : null}
           <div className="mt-8 space-y-4">
             <button
-              className="w-full rounded-2xl border border-line bg-white p-5 text-left transition hover:border-accent hover:bg-accentSoft"
+              className="w-full rounded-xl border border-powder bg-card p-5 text-left transition hover:border-highlight hover:bg-powderSoft hover:shadow-[0_0_0_3px_#E6F7FD]"
               disabled={!users}
               onClick={() => {
                 if (!users) return
@@ -72,11 +74,11 @@ export function LoginPage() {
                 navigate('/analyst/dashboard')
               }}
             >
-              <div className="text-base font-semibold text-copy">L1 Analyst</div>
-              <div className="mt-1 text-sm text-muted">Review case queue, assemble data, autofill STR, draft narrative, validate, submit.</div>
+              <div className="text-[15px] font-semibold text-copy">L1 Analyst</div>
+              <div className="mt-1 text-[13px] text-muted">Review case queue, assemble data, autofill STR, draft narrative, validate, submit.</div>
             </button>
             <button
-              className="w-full rounded-2xl border border-line bg-white p-5 text-left transition hover:border-accent hover:bg-accentSoft"
+              className="w-full rounded-xl border border-powder bg-card p-5 text-left transition hover:border-highlight hover:bg-powderSoft hover:shadow-[0_0_0_3px_#E6F7FD]"
               disabled={!users}
               onClick={() => {
                 if (!users) return
@@ -88,8 +90,8 @@ export function LoginPage() {
                 navigate('/po/dashboard')
               }}
             >
-              <div className="text-base font-semibold text-copy">Principal Officer</div>
-              <div className="mt-1 text-sm text-muted">Review immutable package, inspect audit evidence, request information, approve, and export.</div>
+              <div className="text-[15px] font-semibold text-copy">Principal Officer</div>
+              <div className="mt-1 text-[13px] text-muted">Review immutable package, inspect audit evidence, request information, approve, and export.</div>
             </button>
           </div>
         </div>
