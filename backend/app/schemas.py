@@ -44,6 +44,7 @@ class NarrativeRegenerateSectionRequest(BaseModel):
 
 class CopilotQuestionRequest(BaseModel):
     question: str
+    current_draft: str | None = None
 
 
 class SubmitCaseRequest(BaseModel):

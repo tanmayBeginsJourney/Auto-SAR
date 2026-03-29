@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.services.case_service import dashboard_summary, get_case_transactions, get_str_autofill
-from app.services.narrative_service import compliance_check, generate_narrative, save_narrative
+from app.services.narrative_service import _normalize_sections, compliance_check, generate_narrative, save_narrative
 from app.services.validation_service import submit_case
 
 
@@ -27,6 +27,26 @@ def test_str_autofill_maps_primary_subject_and_account():
     assert autofill["sections"]["part1"]["reportingEntityName"] == "Barclays Bank PLC - India Operations"
     assert autofill["sections"]["part4"]["individuals"][0]["name"] == "Pooja Iyer"
     assert autofill["sections"]["part6"]["accounts"][0]["accountNumber"] == "AC1011"
+
+
+def test_normalize_sections_accepts_full_narrative_text():
+    sections = _normalize_sections(
+        {
+            "grounds_of_suspicion_narrative": (
+                "Introduction: Intro facts.\n\n"
+                "Body: Body facts.\n\n"
+                "Conclusion: Closing rationale."
+            )
+        }
+    )
+    assert [section["id"] for section in sections] == ["introduction", "body", "conclusion"]
+    assert sections[0]["text"] == "Intro facts."
+    assert sections[2]["text"] == "Closing rationale."
+
+
+def test_normalize_sections_accepts_single_section_regeneration():
+    sections = _normalize_sections({"conclusion": "Updated conclusion text."})
+    assert sections == [{"id": "conclusion", "title": "Conclusion", "text": "Updated conclusion text."}]
 
 
 def test_crypto_detection_and_compliance_logic():

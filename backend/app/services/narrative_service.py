@@ -42,6 +42,105 @@ def _clean_json(text: str) -> dict[str, Any]:
     return json.loads(text)
 
 
+def _split_narrative_sections(text: str) -> list[dict[str, str]]:
+    text = text.strip()
+    if not text:
+        return []
+
+    marker_pattern = re.compile(
+        r"(?im)^\s*(Introduction|Body|Conclusion)\s*:\s*"
+    )
+    matches = list(marker_pattern.finditer(text))
+    if matches:
+        sections: list[dict[str, str]] = []
+        for index, match in enumerate(matches):
+            title = match.group(1).title()
+            start = match.end()
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+            body = text[start:end].strip()
+            if body:
+                sections.append(
+                    {
+                        "id": title.lower(),
+                        "title": title,
+                        "text": body,
+                    }
+                )
+        if sections:
+            return sections
+
+    parts = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
+    default_titles = ["Introduction", "Body", "Conclusion"]
+    if len(parts) >= 3:
+        return [
+            {"id": default_titles[index].lower(), "title": default_titles[index], "text": part}
+            for index, part in enumerate(parts[:3])
+        ]
+    if len(parts) == 1:
+        return [{"id": "body", "title": "Body", "text": parts[0]}]
+    return [
+        {"id": f"section-{index + 1}", "title": f"Section {index + 1}", "text": part}
+        for index, part in enumerate(parts)
+    ]
+
+
+def _normalize_sections(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    lowered_payload = {str(key).lower(): value for key, value in payload.items()}
+    raw_sections = payload.get("sections")
+    if isinstance(raw_sections, list):
+        normalized = []
+        for index, section in enumerate(raw_sections):
+            if not isinstance(section, dict):
+                continue
+            text = str(section.get("text") or "").strip()
+            if not text:
+                continue
+            title = str(section.get("title") or section.get("id") or f"Section {index + 1}").strip()
+            section_id = str(section.get("id") or title.lower().replace(" ", "_")).strip()
+            normalized.append({"id": section_id, "title": title, "text": text})
+        if normalized:
+            return normalized
+
+    keyed_sections = []
+    for section_id, title in [("introduction", "Introduction"), ("body", "Body"), ("conclusion", "Conclusion")]:
+        text = payload.get(section_id, lowered_payload.get(section_id))
+        if isinstance(text, str) and text.strip():
+            keyed_sections.append({"id": section_id, "title": title, "text": text.strip()})
+    if keyed_sections:
+        return keyed_sections
+
+    narrative_text = (
+        payload.get("grounds_of_suspicion_narrative")
+        or lowered_payload.get("grounds_of_suspicion_narrative")
+        or payload.get("finalText")
+        or lowered_payload.get("finaltext")
+        or payload.get("final_text")
+        or lowered_payload.get("final_text")
+        or payload.get("narrative")
+        or lowered_payload.get("narrative")
+        or payload.get("draft")
+        or lowered_payload.get("draft")
+    )
+    if isinstance(narrative_text, str) and narrative_text.strip():
+        return _split_narrative_sections(narrative_text)
+
+    string_values = [value.strip() for value in payload.values() if isinstance(value, str) and value.strip()]
+    if string_values:
+        return _split_narrative_sections(max(string_values, key=len))
+
+    return []
+
+
+def _serialize_usage(usage: Any) -> Any:
+    if usage is None:
+        return None
+    if hasattr(usage, "model_dump"):
+        return usage.model_dump()
+    if isinstance(usage, dict):
+        return usage
+    return str(usage)
+
+
 def _section_text(case_id: str, section_id: str, dossier: dict[str, Any]) -> str:
     case = dossier["case"]
     subject = dossier["subject"]
@@ -191,14 +290,14 @@ def _openai_generate(dossier: dict[str, Any], instruction: str | None = None) ->
     )
     latency_ms = int((time.perf_counter() - started) * 1000)
     parsed = _clean_json(response.output_text)
-    sections = parsed.get("sections") or []
+    sections = _normalize_sections(parsed)
     if not sections:
         raise ValueError("Model did not return sections")
     return {
         "sections": sections,
         "finalText": "\n\n".join(section["text"] for section in sections),
         "model": config.openai_model,
-        "usage": getattr(response, "usage", None),
+        "usage": _serialize_usage(getattr(response, "usage", None)),
         "latencyMs": latency_ms,
         "rawResponseId": getattr(response, "id", None),
         "promptPayloadHash": _sha(json.dumps(prompt_payload, sort_keys=True)),
@@ -385,8 +484,34 @@ def get_narrative_audit(case_id: str, actor: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def copilot_answer(case_id: str, actor: dict[str, Any], question: str) -> dict[str, Any]:
-    dossier = build_case_dossier(case_id)
+def _extract_copilot_answer(payload: dict[str, Any], raw_text: str) -> str:
+    for key in ["answer", "response", "guidance", "explanation", "summary"]:
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    if raw_text.strip():
+        return raw_text.strip()
+    return "I prepared a draft update suggestion based on your instruction."
+
+
+def _extract_copilot_suggested_text(payload: dict[str, Any], raw_text: str, current_draft: str) -> str:
+    for key in ["suggested_text", "suggestedText", "updated_draft", "updatedDraft", "revised_draft", "revisedDraft"]:
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+
+    sections = _normalize_sections(payload)
+    if sections:
+        return "\n\n".join(section["text"] for section in sections)
+
+    for value in payload.values():
+        if isinstance(value, str) and value.strip() and value.strip() != raw_text.strip():
+            return value.strip()
+
+    return current_draft
+
+
+def _fallback_copilot_answer(case_id: str, dossier: dict[str, Any], question: str, current_draft: str) -> dict[str, Any]:
     lower = question.lower()
     if "which transactions" in lower:
         answer = "The narrative uses transactions " + ", ".join(txn["transaction_id"] for txn in dossier["transactions"])
@@ -399,14 +524,80 @@ def copilot_answer(case_id: str, actor: dict[str, Any], question: str) -> dict[s
             f"Case {case_id} involves {len(dossier['alerts'])} alert(s), {len(dossier['transactions'])} linked transaction(s), "
             f"and a risk score of {dossier['case']['riskScore']}."
         )
+    suggested_text = current_draft or _fallback_generation(case_id, dossier)["finalText"]
+    return {
+        "answer": answer,
+        "suggestedText": suggested_text,
+        "model": "fallback-local-template",
+        "usage": None,
+        "rawResponseId": None,
+    }
+
+
+def copilot_answer(case_id: str, actor: dict[str, Any], question: str, current_draft: str | None = None) -> dict[str, Any]:
+    dossier = build_case_dossier(case_id)
+    existing_state = ensure_narrative_state(case_id, actor)
+    draft_text = (current_draft or "").strip() or existing_state.get("finalText", "")
+    config = get_config()
+
+    if not config.openai_api_key:
+        result = _fallback_copilot_answer(case_id, dossier, question, draft_text)
+    else:
+        client = OpenAI(api_key=config.openai_api_key)
+        prompt_payload = {
+            "question": question,
+            "currentDraft": draft_text,
+            "dossier": dossier,
+            "instructions": [
+                "Answer the analyst's freeform prompt using only supplied facts.",
+                "Return JSON only.",
+                "Include an 'answer' field with a concise explanation for the analyst.",
+                "Include a 'suggested_text' field containing the full updated narrative draft to place into the editor.",
+                "If the analyst asks for a small change, preserve the rest of the current draft and only adjust the requested parts.",
+                "If the current draft is empty, you may produce a full draft from the supplied dossier facts.",
+                "Do not invent facts, case history, or counterparties not present in the dossier.",
+            ],
+        }
+        started = time.perf_counter()
+        response = client.responses.create(
+            model=config.openai_copilot_model,
+            input=[
+                {
+                    "role": "system",
+                    "content": "You are an AML analyst copilot. Help refine the current SAR narrative draft using only supplied case facts. Return JSON only.",
+                },
+                {"role": "user", "content": json.dumps(prompt_payload)},
+            ],
+        )
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        raw_text = (response.output_text or "").strip()
+        try:
+            parsed = _clean_json(raw_text)
+        except json.JSONDecodeError:
+            parsed = {"answer": raw_text, "suggested_text": draft_text}
+        result = {
+            "answer": _extract_copilot_answer(parsed, raw_text),
+            "suggestedText": _extract_copilot_suggested_text(parsed, raw_text, draft_text),
+            "model": config.openai_copilot_model,
+            "usage": _serialize_usage(getattr(response, "usage", None)),
+            "rawResponseId": getattr(response, "id", None),
+            "latencyMs": latency_ms,
+        }
+
     append_ledger_event(
         case_id=case_id,
         review_cycle_id=ensure_case_exists(case_id)["workflow"].get("current_review_cycle_id"),
         stage=ensure_case_exists(case_id)["workflow"]["current_stage"],
         event_type="NARRATIVE_COPILOT_ASKED",
         actor=actor,
-        payload={"question": question, "answer": answer},
+        payload={
+            "question": question,
+            "answer": result["answer"],
+            "suggestedTextHash": _sha(result["suggestedText"]),
+            "model": result.get("model"),
+            "rawResponseId": result.get("rawResponseId"),
+        },
         entity_type="copilot",
         entity_id=case_id,
     )
-    return {"answer": answer}
+    return result

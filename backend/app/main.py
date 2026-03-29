@@ -272,7 +272,7 @@ def api_narrative_audit(case_id: str, actor: ActorContext = Depends(get_actor)):
 @app.post("/api/cases/{case_id}/narrative/copilot")
 @handle_errors
 def api_narrative_copilot(case_id: str, request: CopilotQuestionRequest, actor: ActorContext = Depends(get_actor)):
-    return copilot_answer(case_id, actor.model_dump(), request.question)
+    return copilot_answer(case_id, actor.model_dump(), request.question, request.current_draft)
 
 
 @app.post("/api/cases/{case_id}/narrative/compliance-check")

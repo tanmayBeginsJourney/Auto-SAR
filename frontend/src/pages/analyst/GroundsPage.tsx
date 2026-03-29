@@ -27,13 +27,22 @@ interface GroundsResponse {
   }
 }
 
+interface CopilotResponse {
+  answer: string
+  suggestedText: string
+  model?: string
+  rawResponseId?: string
+}
+
 export function GroundsPage() {
   const { caseId = '' } = useParams()
   const { session } = useAuth()
   const navigate = useNavigate()
   const [piiMasked, setPiiMasked] = useState(true)
   const [copilotQuestion, setCopilotQuestion] = useState('Why is this suspicious?')
-  const [copilotAnswer, setCopilotAnswer] = useState('')
+  const [copilotResult, setCopilotResult] = useState<CopilotResponse | null>(null)
+  const [copilotError, setCopilotError] = useState<string | null>(null)
+  const [copilotLoading, setCopilotLoading] = useState(false)
   const grounds = useAsyncData<GroundsResponse>(() => apiRequest(`/cases/${caseId}/grounds`, session), [caseId, session])
   const [draftText, setDraftText] = useState('')
   const narrativeAudit = useAsyncData<{
@@ -180,23 +189,58 @@ export function GroundsPage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Analyst Copilot" subtitle="Thin factual Q&A routed to the backend dossier.">
-            <div className="flex gap-3">
-              <input className="input flex-1" value={copilotQuestion} onChange={(event) => setCopilotQuestion(event.target.value)} />
-              <button
-                className="btn-secondary"
-                onClick={async () => {
-                  const reply = await apiRequest<{ answer: string }>(`/cases/${caseId}/narrative/copilot`, session, {
-                    method: 'POST',
-                    body: JSON.stringify({ question: copilotQuestion }),
-                  })
-                  setCopilotAnswer(reply.answer)
-                }}
-              >
-                Ask
-              </button>
+          <SectionCard title="Analyst Copilot" subtitle="Freeform LLM assistance that can suggest updates to the current draft.">
+            <div className="space-y-3">
+              <textarea
+                className="min-h-24 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent"
+                placeholder="Ask for a rewrite, stronger conclusion, clearer chronology, or any other drafting help."
+                value={copilotQuestion}
+                onChange={(event) => setCopilotQuestion(event.target.value)}
+              />
+              <div className="flex gap-3">
+                <button
+                  className="btn-secondary"
+                  disabled={copilotLoading || !copilotQuestion.trim()}
+                  onClick={async () => {
+                    setCopilotLoading(true)
+                    setCopilotError(null)
+                    try {
+                      const reply = await apiRequest<CopilotResponse>(`/cases/${caseId}/narrative/copilot`, session, {
+                        method: 'POST',
+                        body: JSON.stringify({ question: copilotQuestion, current_draft: finalText }),
+                      })
+                      setCopilotResult(reply)
+                    } catch (error) {
+                      setCopilotError(error instanceof Error ? error.message : 'Copilot request failed')
+                    } finally {
+                      setCopilotLoading(false)
+                    }
+                  }}
+                >
+                  {copilotLoading ? 'Thinking...' : 'Ask Copilot'}
+                </button>
+                <button
+                  className="btn-primary"
+                  disabled={!caseItem.canAnalystEdit || !copilotResult?.suggestedText}
+                  onClick={() => setDraftText(copilotResult?.suggestedText ?? finalText)}
+                >
+                  Apply to Draft
+                </button>
+              </div>
             </div>
-            {copilotAnswer ? <div className="mt-4 rounded-lg bg-[#FAFAF8] p-4 text-sm text-copy">{copilotAnswer}</div> : null}
+            {copilotError ? <div className="mt-4 text-sm text-danger">{copilotError}</div> : null}
+            {copilotResult ? (
+              <div className="mt-4 space-y-3">
+                <div className="rounded-lg bg-[#FAFAF8] p-4 text-sm text-copy">{copilotResult.answer}</div>
+                <div className="rounded-lg border border-[#F0EFE9] bg-white p-4">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.08em] text-muted">
+                    <span>Suggested Draft Update</span>
+                    <span>{copilotResult.model ?? 'local'}</span>
+                  </div>
+                  <div className="mt-3 whitespace-pre-wrap text-sm text-copy">{copilotResult.suggestedText}</div>
+                </div>
+              </div>
+            ) : null}
           </SectionCard>
         </div>
       </div>

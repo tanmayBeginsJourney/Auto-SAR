@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProtectedRoute } from '../components/ProtectedRoute'
 import { AnalystDashboardPage } from '../pages/analyst/AnalystDashboardPage'
+import { GroundsPage } from '../pages/analyst/GroundsPage'
 import { StrAutofillPage } from '../pages/analyst/StrAutofillPage'
 import { ValidationPage } from '../pages/analyst/ValidationPage'
 import { AuthProvider } from '../state/auth'
@@ -274,6 +275,90 @@ describe('frontend MVP flows', () => {
     await user.click(screen.getByRole('button', { name: /continue to grounds of suspicion/i }))
 
     expect(await screen.findByText('Grounds Page')).toBeInTheDocument()
+  })
+
+  it('applies copilot suggestions into the narrative draft', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+      if (url.endsWith('/api/cases/CASE001/grounds')) {
+        return jsonResponse({
+          case: {
+            caseId: 'CASE001',
+            customerId: 'IND003',
+            customerName: 'Amit Verma',
+            customerType: 'INDIVIDUAL',
+            primaryAccountNumber: 'AC1003',
+            assignedEmployee: { employeeId: 'EMP001', name: 'Naina Kapoor', level: 'ANALYST' },
+            stage: 'IN_PROGRESS',
+            startTime: '',
+            summary: '',
+            totalAlerts: 3,
+            totalAmount: 5136000,
+            riskScore: 100,
+            riskLevel: 'CRITICAL',
+            riskExplanation: 'Suspicious because the pattern does not match the profile.',
+            riskFactors: [{ name: 'Structuring', contribution: 45, factualBasis: 'Repeated near-threshold cash deposits.' }],
+            branchCity: 'Pune',
+            sla: { status: 'WITHIN_SLA', remainingHours: 10, display: '10 hrs', deadline: '', explanation: '' },
+            valueAtRisk: 5136000,
+            calculation: '',
+            isCryptoCase: false,
+            workflow: { current_stage: 'IN_PROGRESS', locked_for_analyst: false },
+            canAnalystEdit: true,
+          },
+          narrative: {
+            finalText: 'Original narrative draft.',
+            aiDraftText: 'Original narrative draft.',
+            sections: [{ id: 'body', title: 'Body', text: 'Original narrative draft.' }],
+            retrievedGuidance: [],
+            paragraphTraces: [],
+          },
+          dossier: {
+            risk: { riskFactors: [{ name: 'Structuring', contribution: 45, factualBasis: 'Repeated near-threshold cash deposits.' }] },
+            alerts: [{ alert_id: 'AL001', alert_name: 'Structuring' }],
+            transactions: [{ transaction_id: 'T001', txn_timestamp: '2022-09-14', amount: 975000 }],
+          },
+        })
+      }
+      if (url.endsWith('/api/cases/CASE001/narrative/audit')) {
+        return jsonResponse({ promptVersion: 'autosar-v1', retrievedGuidance: [], paragraphTraces: [] })
+      }
+      if (url.endsWith('/api/cases/CASE001/narrative/copilot') && init?.method === 'POST') {
+        expect(init.body).toBe(
+          JSON.stringify({
+            question: 'Rewrite this to sound more formal.',
+            current_draft: 'Original narrative draft.',
+          }),
+        )
+        return jsonResponse({
+          answer: 'I tightened the tone and made the chronology more formal.',
+          suggestedText: 'Updated formal narrative draft.',
+          model: 'gpt-5.4',
+        })
+      }
+      throw new Error(`Unhandled fetch ${url}`)
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/cases/CASE001/grounds-of-suspicion']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cases/:caseId/grounds-of-suspicion" element={<GroundsPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    const copilotPrompt = await screen.findByPlaceholderText(/ask for a rewrite/i)
+    await user.clear(copilotPrompt)
+    await user.type(copilotPrompt, 'Rewrite this to sound more formal.')
+    await user.click(screen.getByRole('button', { name: /ask copilot/i }))
+
+    expect(await screen.findByText(/tightened the tone/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /apply to draft/i }))
+
+    expect(screen.getByPlaceholderText('Generate the draft to start editing.')).toHaveValue('Updated formal narrative draft.')
   })
 
   it('protects routes by role', async () => {
