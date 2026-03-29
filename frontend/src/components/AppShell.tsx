@@ -118,11 +118,11 @@ export function AppShell({
             </div>
           </div>
         ) : null}
-        <div className="mt-auto border-t border-sidebarBorder px-5 pt-3">
-          <div>
-            <div className="text-sm font-medium text-sidebarActive">{session?.userName}</div>
-            <div className="text-[12px] text-sidebarText">{session?.role === 'ANALYST' ? 'L1 Analyst' : 'Principal Officer'}</div>
-            <button className="mt-3 text-xs font-medium text-sidebarText underline-offset-2 hover:underline" onClick={logout}>
+        <div className="mt-auto border-t border-sidebarBorder px-4 pb-5 pt-4">
+          <div className="rounded-xl border border-sidebarBorder/80 bg-[rgba(226,232,240,0.06)] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="text-[13px] font-semibold text-sidebarActive">{session?.userName}</div>
+            <div className="mt-0.5 text-[11px] font-medium text-sidebarText">{session?.role === 'ANALYST' ? 'L1 Analyst' : 'Principal Officer'}</div>
+            <button className="mt-3 text-[11px] font-medium text-sidebarText/80 transition hover:text-sidebarActive hover:underline" onClick={logout}>
               Sign out
             </button>
           </div>
