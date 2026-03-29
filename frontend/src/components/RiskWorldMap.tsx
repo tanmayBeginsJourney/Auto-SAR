@@ -55,11 +55,6 @@ export function RiskWorldMap({
               <title>{`${node.country}${node.city ? ` - ${node.city}` : ''}: ${node.riskReason}`}</title>
               <circle cx={point[0]} cy={point[1]} fill={tone.ring} r={18} />
               <circle cx={point[0]} cy={point[1]} fill={tone.fill} r={8} />
-              {node.label ? (
-                <text fill="#3D3D3A" fontSize={11} textAnchor="middle" x={point[0]} y={point[1] - 14}>
-                  {node.label}
-                </text>
-              ) : null}
             </g>
           )
         })}
