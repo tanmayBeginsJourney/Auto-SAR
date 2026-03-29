@@ -145,7 +145,7 @@ export function GroundsPage() {
                         {new Date(entry.occurredAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                       </div>
                     </div>
-                    <div className="mt-2 text-sm text-muted">{entry.description}</div>
+                    <div className="mt-2 whitespace-pre-line text-sm text-muted">{entry.description}</div>
                   </div>
                 ))}
               </div>

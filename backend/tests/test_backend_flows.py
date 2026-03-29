@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services.case_service import dashboard_summary, get_case_transactions, get_str_autofill
+from app.services.case_service import dashboard_summary, get_case_transactions, get_str_autofill, list_cases, po_map_risk
 from app.services.narrative_service import _normalize_sections, compliance_check, generate_narrative, save_narrative
 from app.services.validation_service import submit_case
 
@@ -90,3 +90,18 @@ def test_api_smoke_for_analyst_and_po_routes():
     assert client.get("/api/cases/CASE001/grounds", headers=analyst_headers).status_code == 200
     assert client.get("/api/po/dashboard/summary", headers=po_headers).status_code == 200
     assert client.post("/api/po/cases/CASE002/validate-approval", headers=po_headers).status_code == 200
+
+
+def test_case_risk_scores_are_varied_and_case001_is_highest():
+    scores = {item["caseId"]: item["riskScore"] for item in list_cases()}
+    assert scores["CASE001"] == 97
+    assert scores["CASE003"] == 85
+    assert scores["CASE002"] == 84
+    assert len(set(scores.values())) == 3
+
+
+def test_po_map_includes_sanctioned_country_hotspots():
+    nodes = po_map_risk()["nodes"]
+    sanctioned = {node["country"]: node for node in nodes if node["riskReason"] == "Sanctioned Country High Risk"}
+    assert {"Iran", "North Korea", "Syria"}.issubset(set(sanctioned))
+    assert all(node["severity"] == "critical" for node in sanctioned.values())

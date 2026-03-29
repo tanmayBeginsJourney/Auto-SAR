@@ -154,8 +154,8 @@ def _audit_heading(entry: dict[str, Any]) -> str:
         "NARRATIVE_GENERATED": "Initial draft generated",
         "NARRATIVE_REGENERATED": "Draft regenerated",
         "NARRATIVE_MANUALLY_EDITED": "Draft saved",
-        "NARRATIVE_COPILOT_ASKED": "Copilot asked",
-        "NARRATIVE_COPILOT_APPLIED": "Copilot applied",
+        "NARRATIVE_COPILOT_ASKED": "User asked Saaregama",
+        "NARRATIVE_COPILOT_APPLIED": "Saaregama applied the changes to draft",
     }.get(entry.get("event_type", ""), entry.get("event_type", "Audit event").replace("_", " ").title())
 
 
@@ -173,9 +173,18 @@ def _audit_description(entry: dict[str, Any]) -> str:
         reason = payload.get("editReason") or "Analyst review edit"
         return f'Draft content was saved manually. Reason: "{reason}"'
     if event_type == "NARRATIVE_COPILOT_ASKED":
+        answer = str(payload.get("answer", "")).strip()
+        answer_excerpt = answer[:180].rstrip()
+        if answer and len(answer) > 180:
+            answer_excerpt += "..."
+        if answer_excerpt:
+            return f'User asked "{payload.get("question", "")}"\nSaaregama replied: "{answer_excerpt}"'
         return f'User asked "{payload.get("question", "")}"'
     if event_type == "NARRATIVE_COPILOT_APPLIED":
-        return f'Applied the copilot suggestion from query "{payload.get("question", "")}" to the draft editor.'
+        model = payload.get("model")
+        if model:
+            return f'Applied Saaregama response from query "{payload.get("question", "")}" to the draft editor using {model}.'
+        return f'Applied Saaregama response from query "{payload.get("question", "")}" to the draft editor.'
     return "Narrative activity was recorded."
 
 
@@ -199,7 +208,7 @@ def _narrative_audit_entries(case_id: str) -> list[dict[str, Any]]:
                 "description": _audit_description(entry),
             }
         )
-    return entries
+    return list(reversed(entries))
 
 
 def _section_text(case_id: str, section_id: str, dossier: dict[str, Any]) -> str:

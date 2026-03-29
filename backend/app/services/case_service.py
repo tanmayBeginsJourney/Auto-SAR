@@ -26,7 +26,7 @@ from .runtime_state import (
 
 
 SLA_LIMITS = {"OPEN": 72, "IN_PROGRESS": 72, "PENDING_REVIEW": 24, "SUBMITTED": 24, "RFI_REQUESTED": 48}
-RISK_BASE = {"LOW": 25, "MEDIUM": 50, "HIGH": 70}
+RISK_BASE = {"LOW": 20, "MEDIUM": 35, "HIGH": 45}
 FLAG_WEIGHTS = {
     "pep_match": 12,
     "smurfing": 10,
@@ -34,7 +34,57 @@ FLAG_WEIGHTS = {
     "aml_screening_list": 10,
     "cross_border_remittance": 6,
 }
-RULE_BONUS = {"R14": 8, "R08": 6, "R12": 6, "R05": 5, "R01": 3, "R04": 3, "R06": 3}
+RULE_BONUS = {"R14": 10, "R08": 10, "R12": 5, "R05": 8, "R01": 4, "R04": 2, "R06": 2}
+SANCTIONED_MAP_NODES = [
+    {
+        "locationKey": "tehran-sanctioned",
+        "label": "",
+        "lat": 35.6892,
+        "lng": 51.3890,
+        "country": "Iran",
+        "city": "Tehran",
+        "linkedCaseCount": 0,
+        "linkedAlertCount": 0,
+        "totalAmount": 0,
+        "highestRiskLevel": "CRITICAL",
+        "riskReason": "Sanctioned Country High Risk",
+        "caseIds": [],
+        "resolutionSource": "static-policy-overlay",
+        "severity": "critical",
+    },
+    {
+        "locationKey": "pyongyang-sanctioned",
+        "label": "",
+        "lat": 39.0392,
+        "lng": 125.7625,
+        "country": "North Korea",
+        "city": "Pyongyang",
+        "linkedCaseCount": 0,
+        "linkedAlertCount": 0,
+        "totalAmount": 0,
+        "highestRiskLevel": "CRITICAL",
+        "riskReason": "Sanctioned Country High Risk",
+        "caseIds": [],
+        "resolutionSource": "static-policy-overlay",
+        "severity": "critical",
+    },
+    {
+        "locationKey": "damascus-sanctioned",
+        "label": "",
+        "lat": 33.5138,
+        "lng": 36.2765,
+        "country": "Syria",
+        "city": "Damascus",
+        "linkedCaseCount": 0,
+        "linkedAlertCount": 0,
+        "totalAmount": 0,
+        "highestRiskLevel": "CRITICAL",
+        "riskReason": "Sanctioned Country High Risk",
+        "caseIds": [],
+        "resolutionSource": "static-policy-overlay",
+        "severity": "critical",
+    },
+]
 
 
 def _parse_dt(value: str) -> datetime:
@@ -777,6 +827,8 @@ def po_map_risk() -> dict[str, Any]:
             if txn["isCryptoTouch"]:
                 node["severity"] = "critical"
                 node["riskReason"] = "Crypto-exchange-linked suspicious movement originated from this branch city."
+    for node in SANCTIONED_MAP_NODES:
+        nodes.setdefault(node["locationKey"], dict(node))
     return {"nodes": list(nodes.values())}
 
 
