@@ -9,7 +9,7 @@ from typing import Any
 from openai import OpenAI
 
 from ..config import get_config
-from .audit import append_ledger_event
+from .audit import append_ledger_event, read_ledger
 from .case_service import (
     ensure_case_exists,
     get_adverse_media,
@@ -42,8 +42,16 @@ def _clean_json(text: str) -> dict[str, Any]:
     return json.loads(text)
 
 
-def _split_narrative_sections(text: str) -> list[dict[str, str]]:
+def _strip_code_fences(text: str) -> str:
     text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?", "", text).strip()
+        text = re.sub(r"```$", "", text).strip()
+    return text
+
+
+def _split_narrative_sections(text: str) -> list[dict[str, str]]:
+    text = _strip_code_fences(text)
     if not text:
         return []
 
@@ -139,6 +147,59 @@ def _serialize_usage(usage: Any) -> Any:
     if isinstance(usage, dict):
         return usage
     return str(usage)
+
+
+def _audit_heading(entry: dict[str, Any]) -> str:
+    return {
+        "NARRATIVE_GENERATED": "Initial draft generated",
+        "NARRATIVE_REGENERATED": "Draft regenerated",
+        "NARRATIVE_MANUALLY_EDITED": "Draft saved",
+        "NARRATIVE_COPILOT_ASKED": "Copilot asked",
+        "NARRATIVE_COPILOT_APPLIED": "Copilot applied",
+    }.get(entry.get("event_type", ""), entry.get("event_type", "Audit event").replace("_", " ").title())
+
+
+def _audit_description(entry: dict[str, Any]) -> str:
+    payload = entry.get("payload_json", {})
+    event_type = entry.get("event_type")
+    if event_type == "NARRATIVE_GENERATED":
+        return f'Generated the first narrative draft using {payload.get("model", "the configured model")}.'
+    if event_type == "NARRATIVE_REGENERATED":
+        instruction = payload.get("instruction")
+        if instruction:
+            return f'Regenerated the draft with instruction: "{instruction}"'
+        return f'Regenerated the narrative draft using {payload.get("model", "the configured model")}.'
+    if event_type == "NARRATIVE_MANUALLY_EDITED":
+        reason = payload.get("editReason") or "Analyst review edit"
+        return f'Draft content was saved manually. Reason: "{reason}"'
+    if event_type == "NARRATIVE_COPILOT_ASKED":
+        return f'User asked "{payload.get("question", "")}"'
+    if event_type == "NARRATIVE_COPILOT_APPLIED":
+        return f'Applied the copilot suggestion from query "{payload.get("question", "")}" to the draft editor.'
+    return "Narrative activity was recorded."
+
+
+def _narrative_audit_entries(case_id: str) -> list[dict[str, Any]]:
+    supported_types = {
+        "NARRATIVE_GENERATED",
+        "NARRATIVE_REGENERATED",
+        "NARRATIVE_MANUALLY_EDITED",
+        "NARRATIVE_COPILOT_ASKED",
+        "NARRATIVE_COPILOT_APPLIED",
+    }
+    entries = []
+    for entry in read_ledger(case_id):
+        if entry.get("event_type") not in supported_types:
+            continue
+        entries.append(
+            {
+                "eventId": entry.get("event_id"),
+                "occurredAt": entry.get("occurred_at"),
+                "heading": _audit_heading(entry),
+                "description": _audit_description(entry),
+            }
+        )
+    return entries
 
 
 def _section_text(case_id: str, section_id: str, dossier: dict[str, Any]) -> str:
@@ -289,8 +350,14 @@ def _openai_generate(dossier: dict[str, Any], instruction: str | None = None) ->
         ],
     )
     latency_ms = int((time.perf_counter() - started) * 1000)
-    parsed = _clean_json(response.output_text)
+    raw_output = response.output_text or ""
+    try:
+        parsed = _clean_json(raw_output)
+    except json.JSONDecodeError:
+        parsed = {}
     sections = _normalize_sections(parsed)
+    if not sections and raw_output.strip():
+        sections = _split_narrative_sections(raw_output)
     if not sections:
         raise ValueError("Model did not return sections")
     return {
@@ -337,6 +404,7 @@ def _run_generation(case_id: str, dossier: dict[str, Any], actor: dict[str, Any]
         payload={
             "model": generated["model"],
             "promptVersion": get_config().prompt_version,
+            "instruction": instruction,
             "promptPayloadHash": generated.get("promptPayloadHash"),
             "retrievedChunkIds": [chunk["chunkId"] for chunk in retrieved],
             "sourceTransactionIds": [txn["transaction_id"] for txn in dossier["transactions"]],
@@ -369,7 +437,7 @@ def ensure_narrative_state(case_id: str, actor: dict[str, Any], allow_generation
 
 
 def get_grounds(case_id: str, actor: dict[str, Any]) -> dict[str, Any]:
-    state = ensure_narrative_state(case_id, actor)
+    state = ensure_narrative_state(case_id, actor, allow_generation=True)
     return {"case": get_case_detail(case_id), "dossier": build_case_dossier(case_id), "narrative": state}
 
 
@@ -480,6 +548,7 @@ def get_narrative_audit(case_id: str, actor: dict[str, Any]) -> dict[str, Any]:
         "promptVersion": state.get("promptVersion"),
         "retrievedGuidance": state.get("retrievedGuidance", []),
         "paragraphTraces": state.get("paragraphTraces", []),
+        "ledgerEntries": _narrative_audit_entries(case_id),
         "dossier": state.get("dossier"),
     }
 
@@ -601,3 +670,29 @@ def copilot_answer(case_id: str, actor: dict[str, Any], question: str, current_d
         entity_id=case_id,
     )
     return result
+
+
+def record_copilot_apply(
+    case_id: str,
+    actor: dict[str, Any],
+    question: str,
+    suggested_text: str,
+    model: str | None = None,
+    raw_response_id: str | None = None,
+) -> dict[str, Any]:
+    append_ledger_event(
+        case_id=case_id,
+        review_cycle_id=ensure_case_exists(case_id)["workflow"].get("current_review_cycle_id"),
+        stage=ensure_case_exists(case_id)["workflow"]["current_stage"],
+        event_type="NARRATIVE_COPILOT_APPLIED",
+        actor=actor,
+        payload={
+            "question": question,
+            "suggestedTextHash": _sha(suggested_text),
+            "model": model,
+            "rawResponseId": raw_response_id,
+        },
+        entity_type="copilot",
+        entity_id=case_id,
+    )
+    return {"status": "ok"}

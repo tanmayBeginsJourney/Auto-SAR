@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -53,6 +54,7 @@ def append_ledger_event(
         "case_id": case_id,
         "review_cycle_id": review_cycle_id,
         "stage": stage,
+        "occurred_at": datetime.now(UTC).isoformat(),
         "event_type": event_type,
         "actor_type": actor.get("role"),
         "actor_id": actor.get("user_id"),

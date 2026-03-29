@@ -279,6 +279,7 @@ describe('frontend MVP flows', () => {
 
   it('applies copilot suggestions into the narrative draft', async () => {
     const user = userEvent.setup()
+    let auditCalls = 0
     vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
       const url = String(input)
       if (url.endsWith('/api/cases/CASE001/grounds')) {
@@ -322,7 +323,62 @@ describe('frontend MVP flows', () => {
         })
       }
       if (url.endsWith('/api/cases/CASE001/narrative/audit')) {
-        return jsonResponse({ promptVersion: 'autosar-v1', retrievedGuidance: [], paragraphTraces: [] })
+        auditCalls += 1
+        if (auditCalls === 1) {
+          return jsonResponse({
+            promptVersion: 'autosar-v1',
+            ledgerEntries: [
+              {
+                eventId: 'evt_1',
+                occurredAt: '2026-03-29T11:05:00Z',
+                heading: 'Initial draft generated',
+                description: 'Generated the first narrative draft using gpt-5.4.',
+              },
+            ],
+          })
+        }
+        if (auditCalls === 2) {
+          return jsonResponse({
+            promptVersion: 'autosar-v1',
+            ledgerEntries: [
+              {
+                eventId: 'evt_1',
+                occurredAt: '2026-03-29T11:05:00Z',
+                heading: 'Initial draft generated',
+                description: 'Generated the first narrative draft using gpt-5.4.',
+              },
+              {
+                eventId: 'evt_2',
+                occurredAt: '2026-03-29T11:06:00Z',
+                heading: 'Copilot asked',
+                description: 'User asked "Rewrite this to sound more formal."',
+              },
+            ],
+          })
+        }
+        return jsonResponse({
+          promptVersion: 'autosar-v1',
+          ledgerEntries: [
+            {
+              eventId: 'evt_1',
+              occurredAt: '2026-03-29T11:05:00Z',
+              heading: 'Initial draft generated',
+              description: 'Generated the first narrative draft using gpt-5.4.',
+            },
+            {
+              eventId: 'evt_2',
+              occurredAt: '2026-03-29T11:06:00Z',
+              heading: 'Copilot asked',
+              description: 'User asked "Rewrite this to sound more formal."',
+            },
+            {
+              eventId: 'evt_3',
+              occurredAt: '2026-03-29T11:07:00Z',
+              heading: 'Copilot applied',
+              description: 'Applied the copilot suggestion from query "Rewrite this to sound more formal." to the draft editor.',
+            },
+          ],
+        })
       }
       if (url.endsWith('/api/cases/CASE001/narrative/copilot') && init?.method === 'POST') {
         expect(init.body).toBe(
@@ -336,6 +392,16 @@ describe('frontend MVP flows', () => {
           suggestedText: 'Updated formal narrative draft.',
           model: 'gpt-5.4',
         })
+      }
+      if (url.endsWith('/api/cases/CASE001/narrative/copilot/apply') && init?.method === 'POST') {
+        expect(init.body).toBe(
+          JSON.stringify({
+            question: 'Rewrite this to sound more formal.',
+            suggested_text: 'Updated formal narrative draft.',
+            model: 'gpt-5.4',
+          }),
+        )
+        return jsonResponse({ status: 'ok' })
       }
       throw new Error(`Unhandled fetch ${url}`)
     })
@@ -356,9 +422,11 @@ describe('frontend MVP flows', () => {
     await user.click(screen.getByRole('button', { name: /ask copilot/i }))
 
     expect(await screen.findByText(/tightened the tone/i)).toBeInTheDocument()
+    expect(await screen.findByText(/User asked "Rewrite this to sound more formal."/i)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /apply to draft/i }))
 
     expect(screen.getByPlaceholderText('Generate the draft to start editing.')).toHaveValue('Updated formal narrative draft.')
+    expect(await screen.findByText(/Applied the copilot suggestion from query/i)).toBeInTheDocument()
   })
 
   it('protects routes by role', async () => {

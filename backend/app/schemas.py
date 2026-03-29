@@ -47,6 +47,13 @@ class CopilotQuestionRequest(BaseModel):
     current_draft: str | None = None
 
 
+class CopilotApplyRequest(BaseModel):
+    question: str
+    suggested_text: str
+    model: str | None = None
+    raw_response_id: str | None = None
+
+
 class SubmitCaseRequest(BaseModel):
     analyst_notes: str | None = None
 

@@ -11,6 +11,7 @@ from .schemas import (
     ActorContext,
     AdverseMediaReviewUpdate,
     ApproveCaseRequest,
+    CopilotApplyRequest,
     CopilotQuestionRequest,
     NarrativeRegenerateSectionRequest,
     NarrativeUpdateRequest,
@@ -56,6 +57,7 @@ from .services.export_service import (
 from .services.narrative_service import (
     compliance_check,
     copilot_answer,
+    record_copilot_apply,
     generate_narrative,
     get_grounds,
     get_narrative_audit,
@@ -273,6 +275,19 @@ def api_narrative_audit(case_id: str, actor: ActorContext = Depends(get_actor)):
 @handle_errors
 def api_narrative_copilot(case_id: str, request: CopilotQuestionRequest, actor: ActorContext = Depends(get_actor)):
     return copilot_answer(case_id, actor.model_dump(), request.question, request.current_draft)
+
+
+@app.post("/api/cases/{case_id}/narrative/copilot/apply")
+@handle_errors
+def api_narrative_copilot_apply(case_id: str, request: CopilotApplyRequest, actor: ActorContext = Depends(require_role("ANALYST"))):
+    return record_copilot_apply(
+        case_id,
+        actor.model_dump(),
+        request.question,
+        request.suggested_text,
+        request.model,
+        request.raw_response_id,
+    )
 
 
 @app.post("/api/cases/{case_id}/narrative/compliance-check")

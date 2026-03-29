@@ -5,7 +5,6 @@ import { CaseHeader } from '../../components/CaseHeader'
 import { EmptyState, ErrorState, LoadingState, SectionCard } from '../../components/common'
 import { useAsyncData } from '../../hooks/useAsyncData'
 import { apiRequest } from '../../lib/api'
-import { compactHash } from '../../lib/format'
 import { useAuth } from '../../state/auth'
 import type { CaseItem } from '../../types'
 import { analystSteps } from '../steps'
@@ -30,6 +29,7 @@ interface GroundsResponse {
 interface CopilotResponse {
   answer: string
   suggestedText: string
+  question?: string
   model?: string
   rawResponseId?: string
 }
@@ -47,8 +47,7 @@ export function GroundsPage() {
   const [draftText, setDraftText] = useState('')
   const narrativeAudit = useAsyncData<{
     promptVersion?: string
-    retrievedGuidance: Array<{ chunkId: string; source: string; excerpt: string }>
-    paragraphTraces: Array<{ traceId: string; sectionId: string; sourceTransactionIds: string[]; sourceAlertIds: string[]; retrievedChunkIds: string[]; origin: string }>
+    ledgerEntries: Array<{ eventId: string; occurredAt: string; heading: string; description: string }>
   }>(() => apiRequest(`/cases/${caseId}/narrative/audit`, session), [caseId, session, grounds.data?.narrative.finalText])
 
   const finalText = draftText || grounds.data?.narrative.finalText || ''
@@ -133,23 +132,20 @@ export function GroundsPage() {
               ))}
             </div>
           </SectionCard>
-          <SectionCard title="Narrative Trace Audit" subtitle="Prompt lineage, retrieved local guidance, and paragraph provenance.">
-            {!narrativeAudit.data?.paragraphTraces.length ? (
-              <EmptyState title="No narrative trace yet" body="Generate a draft to populate the audit panel." />
+          <SectionCard title="Narrative Trace Audit" subtitle="Chronological audit ledger for draft creation and copilot activity.">
+            {!narrativeAudit.data?.ledgerEntries.length ? (
+              <EmptyState title="No audit entries yet" body="The first draft entry appears automatically when the page opens." />
             ) : (
               <div className="space-y-3">
-                {narrativeAudit.data.paragraphTraces.map((trace) => (
-                  <div className="rounded-lg border border-[#F0EFE9] bg-[#FAFAF8] p-4 text-sm" key={trace.traceId}>
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">{trace.sectionId}</div>
-                      <div className="text-xs uppercase tracking-[0.08em] text-muted">{trace.origin}</div>
+                {narrativeAudit.data.ledgerEntries.map((entry) => (
+                  <div className="rounded-lg border border-[#F0EFE9] bg-[#FAFAF8] p-4 text-sm" key={entry.eventId}>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="font-medium text-copy">{entry.heading}</div>
+                      <div className="text-xs uppercase tracking-[0.08em] text-muted">
+                        {new Date(entry.occurredAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                      </div>
                     </div>
-                    <div className="mt-2 text-xs text-muted">
-                      Transactions: {trace.sourceTransactionIds.join(', ')} • Alerts: {trace.sourceAlertIds.join(', ')}
-                    </div>
-                    <div className="mt-2 font-mono text-xs text-muted">
-                      Guidance chunks: {trace.retrievedChunkIds.map(compactHash).join(', ')}
-                    </div>
+                    <div className="mt-2 text-sm text-muted">{entry.description}</div>
                   </div>
                 ))}
               </div>
@@ -209,7 +205,8 @@ export function GroundsPage() {
                         method: 'POST',
                         body: JSON.stringify({ question: copilotQuestion, current_draft: finalText }),
                       })
-                      setCopilotResult(reply)
+                      setCopilotResult({ ...reply, question: copilotQuestion })
+                      await narrativeAudit.reload()
                     } catch (error) {
                       setCopilotError(error instanceof Error ? error.message : 'Copilot request failed')
                     } finally {
@@ -222,7 +219,20 @@ export function GroundsPage() {
                 <button
                   className="btn-primary"
                   disabled={!caseItem.canAnalystEdit || !copilotResult?.suggestedText}
-                  onClick={() => setDraftText(copilotResult?.suggestedText ?? finalText)}
+                  onClick={async () => {
+                    if (!copilotResult?.suggestedText) return
+                    await apiRequest(`/cases/${caseId}/narrative/copilot/apply`, session, {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        question: copilotResult.question ?? copilotQuestion,
+                        suggested_text: copilotResult.suggestedText,
+                        model: copilotResult.model,
+                        raw_response_id: copilotResult.rawResponseId,
+                      }),
+                    })
+                    setDraftText(copilotResult.suggestedText)
+                    await narrativeAudit.reload()
+                  }}
                 >
                   Apply to Draft
                 </button>
