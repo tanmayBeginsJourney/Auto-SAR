@@ -1,0 +1,15 @@
+# GitHub Linguist: keep language stats aligned with real source (see /repos/.../languages API).
+# Large PDFs/DB/images are not application code for the bar; TS/PY/TSX are explicit.
+
+*.py linguist-language=Python
+*.tsx linguist-language=TypeScript
+*.ts linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.css linguist-language=CSS
+*.sql linguist-language=SQL
+
+*.pdf linguist-detectable=false
+*.db linguist-detectable=false
+*.png linguist-detectable=false
+
+frontend/package-lock.json linguist-generated
