@@ -1,31 +1,24 @@
-# Secrets and local env
+# Copied from .env.example; holds OPENAI_API_KEY and paths
 .env
 .env.*
 !.env.example
 
-# Python
+# backend: running Python / installing deps locally
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
 .venv/
 venv/
 
-# Frontend / Node
+# frontend: npm install and vite build
 frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
-*.tsbuildinfo
 
-# Runtime-generated app state
+# Written at runtime by the FastAPI app (not source)
 runtime_state/cases/
 runtime_state/audit_ledger/
 runtime_state/artifacts/
 runtime_state/retrieval_index.json
 
-# OS / editor noise
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# No package.json at repo root; npm may still drop this here
+/package-lock.json

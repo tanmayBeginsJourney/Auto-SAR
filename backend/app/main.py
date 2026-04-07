@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from functools import wraps
 from typing import Callable
 
@@ -75,7 +76,17 @@ from .services.validation_service import (
 )
 
 
-app = FastAPI(title="Auto-SAR MVP", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    build_retrieval_index()
+    for case_id in ["CASE001", "CASE002", "CASE003"]:
+        case = ensure_case_exists(case_id)
+        if case["stage"] in {"PENDING_REVIEW", "SUBMITTED"}:
+            ensure_initial_pending_submission(case_id)
+    yield
+
+
+app = FastAPI(title="Auto-SAR", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -83,15 +94,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def startup() -> None:
-    build_retrieval_index()
-    for case_id in ["CASE001", "CASE002", "CASE003"]:
-        case = ensure_case_exists(case_id)
-        if case["stage"] in {"PENDING_REVIEW", "SUBMITTED"}:
-            ensure_initial_pending_submission(case_id)
 
 
 def get_actor(

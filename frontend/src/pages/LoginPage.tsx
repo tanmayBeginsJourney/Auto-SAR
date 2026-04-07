@@ -36,15 +36,15 @@ export function LoginPage() {
             </div>
           </div>
           <h1 className="max-w-xl text-4xl font-semibold leading-tight text-copy">
-            Build a believable STR/SAR workflow demo around the real seeded Barclays cases.
+            STR/SAR preparation from case intake through Principal Officer approval—with a clear audit trail.
           </h1>
           <p className="mt-5 max-w-xl text-sm leading-7 text-muted">
-            The MVP walks from analyst queue, through deterministic STR autofill and AI-assisted grounds of
-            suspicion, into Principal Officer review, approval, and export with a visible audit chain.
+            Move from analyst queue through STR autofill and AI-assisted grounds of suspicion into PO review,
+            approval, and export—with ledger-backed events at each step.
           </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             {[
-              ['Live SQLite dataset', 'CASE001, CASE002, and CASE003 are loaded directly from the supplied demo DB.'],
+              ['Linked demo cases', 'CASE001, CASE002, and CASE003 load from the bundled relational dataset.'],
               ['Explainable scoring', 'Risk, SLA, validation, and crypto handling all expose plain-language reasoning.'],
               ['Immutable exports', 'Approved bundles include XML, PDF dossier, ledger JSON, and persisted hashes.'],
             ].map(([title, body]) => (

@@ -485,7 +485,11 @@ def save_narrative(case_id: str, actor: dict[str, Any], final_text: str, section
         parts = [part.strip() for part in final_text.split("\n\n") if part.strip()]
         template_titles = ["Introduction", "Body", "Conclusion"]
         sections = [
-            {"id": template_titles[index].lower(), "title": template_titles[index], "text": text}
+            {
+                "id": (template_titles[index] if index < len(template_titles) else f"supporting-detail-{index - len(template_titles) + 1}").lower().replace(" ", "-"),
+                "title": template_titles[index] if index < len(template_titles) else f"Supporting Detail {index - len(template_titles) + 1}",
+                "text": text,
+            }
             for index, text in enumerate(parts)
         ]
     current["sections"] = sections

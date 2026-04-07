@@ -89,8 +89,6 @@ Threshold math:
 Adverse media:
 - `AM003`: World Check hit marked `PERFECT_MATCH`
 
-## Suggested Frontend Checks
+## Quick verification
 
-1. Open `CASE001` and confirm the UI shows 3 alerts and 5 linked key transactions.
-2. Open `CASE002` and confirm the UI shows the inbound from `CASE001` plus the 4 beneficiary payouts.
-3. Open `CASE003` and confirm the UI shows the suspicious receipt from `CASE002`, the Binance transfer, and the adverse media row.
+`CASE001` → three alerts and linked transactions; `CASE002` → inbound from `CASE001` and four payouts; `CASE003` → receipt from `CASE002`, Binance leg, adverse media.

@@ -16,6 +16,8 @@ export function DataAssemblyPage() {
   const navigate = useNavigate()
   const [piiMasked, setPiiMasked] = useState(true)
   const [tab, setTab] = useState<'kyc' | 'txn' | 'alerts' | 'graph'>('kyc')
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [continuing, setContinuing] = useState(false)
   const caseQuery = useAsyncData<CaseItem>(() => apiRequest(`/cases/${caseId}`, session), [caseId, session])
   const kyc = useAsyncData<Record<string, unknown>>(() => apiRequest(`/cases/${caseId}/kyc`, session), [caseId, session])
   const transactions = useAsyncData<TransactionItem[]>(() => apiRequest(`/cases/${caseId}/transactions`, session), [caseId, session])
@@ -28,12 +30,21 @@ export function DataAssemblyPage() {
   const adverseMedia = useAsyncData<Array<Record<string, unknown>>>(() => apiRequest(`/cases/${caseId}/adverse-media`, session), [caseId, session])
 
   const continueFlow = async () => {
-    if (!caseQuery.data?.canAnalystEdit) return
-    await apiRequest(`/cases/${caseId}/data-assembly/complete-stage`, session, {
-      method: 'POST',
-      body: JSON.stringify({ note: 'Analyst completed data assembly review' }),
-    })
-    navigate(`/cases/${caseId}/str-autofill`)
+    setContinuing(true)
+    setActionError(null)
+    try {
+      if (caseQuery.data?.canAnalystEdit) {
+        await apiRequest(`/cases/${caseId}/data-assembly/complete-stage`, session, {
+          method: 'POST',
+          body: JSON.stringify({ note: 'Analyst completed data assembly review' }),
+        })
+      }
+      navigate(`/cases/${caseId}/str-autofill`)
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to continue to STR Autofill')
+    } finally {
+      setContinuing(false)
+    }
   }
 
   if (caseQuery.loading) {
@@ -200,8 +211,8 @@ export function DataAssemblyPage() {
             title="Case Readiness"
             subtitle="Continue once the subject, account, alerts, linked transactions, and adverse-media pane are all present."
             action={
-              <button className="btn-primary" disabled={!caseQuery.data.canAnalystEdit} onClick={continueFlow}>
-                Verified. Continue to STR Autofill
+              <button className="btn-primary" disabled={continuing} onClick={continueFlow} type="button">
+                {continuing ? 'Continuing...' : 'Verified. Continue to STR Autofill'}
               </button>
             }
           >
@@ -215,6 +226,7 @@ export function DataAssemblyPage() {
                 <div className="mt-1 text-muted">{transactions.data?.length ?? 0} transaction(s)</div>
               </div>
             </div>
+            {actionError ? <div className="mt-4 text-sm text-danger">{actionError}</div> : null}
           </SectionCard>
         </div>
       </div>

@@ -23,6 +23,7 @@ export function StrAutofillPage() {
   const navigate = useNavigate()
   const [piiMasked, setPiiMasked] = useState(true)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [continuing, setContinuing] = useState(false)
   const caseQuery = useAsyncData<CaseItem>(() => apiRequest(`/cases/${caseId}`, session), [caseId, session])
   const autofill = useAsyncData<StrAutofillResponse>(() => apiRequest(`/cases/${caseId}/str-autofill`, session), [caseId, session])
   const [draft, setDraft] = useState<StrAutofillResponse | null>(null)
@@ -30,7 +31,6 @@ export function StrAutofillPage() {
   const activeDraft = useMemo(() => draft ?? autofill.data, [autofill.data, draft])
 
   const save = async () => {
-    if (!caseQuery.data?.canAnalystEdit) return
     if (!activeDraft) return
     setActionError(null)
     const saved = await apiRequest<StrAutofillResponse>(`/cases/${caseId}/str-autofill`, session, {
@@ -41,16 +41,21 @@ export function StrAutofillPage() {
   }
 
   const continueFlow = async () => {
-    if (!caseQuery.data?.canAnalystEdit) return
+    setContinuing(true)
+    setActionError(null)
     try {
-      await save()
-      await apiRequest(`/cases/${caseId}/str-autofill/complete-stage`, session, {
-        method: 'POST',
-        body: JSON.stringify({ note: 'Analyst saved STR autofill draft' }),
-      })
+      if (caseQuery.data?.canAnalystEdit) {
+        await save()
+        await apiRequest(`/cases/${caseId}/str-autofill/complete-stage`, session, {
+          method: 'POST',
+          body: JSON.stringify({ note: 'Analyst saved STR autofill draft' }),
+        })
+      }
       navigate(`/cases/${caseId}/grounds-of-suspicion`)
     } catch (error) {
       setActionError(error instanceof Error ? error.message : 'Unable to continue to grounds of suspicion')
+    } finally {
+      setContinuing(false)
     }
   }
 
@@ -112,7 +117,6 @@ export function StrAutofillPage() {
                     {editable ? (
                       <input
                         className="input w-full"
-                        disabled={!caseQuery.data?.canAnalystEdit}
                         value={String(value ?? '')}
                         onChange={(event) =>
                           setDraft((current) => ({
@@ -139,11 +143,11 @@ export function StrAutofillPage() {
           </SectionCard>
         ))}
         <div className="flex justify-end gap-3">
-          <button className="btn-success" disabled={!caseQuery.data.canAnalystEdit} onClick={save}>
+          <button className="btn-success" onClick={save} type="button">
             Save Draft
           </button>
-          <button className="btn-primary" disabled={!caseQuery.data.canAnalystEdit} onClick={continueFlow}>
-            Continue to Grounds of Suspicion
+          <button className="btn-primary" disabled={continuing} onClick={continueFlow} type="button">
+            {continuing ? 'Continuing...' : 'Continue to Grounds of Suspicion'}
           </button>
         </div>
         {actionError ? <div className="text-sm text-danger">{actionError}</div> : null}

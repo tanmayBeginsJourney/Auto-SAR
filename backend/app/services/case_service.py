@@ -3,7 +3,7 @@ from __future__ import annotations
 import difflib
 import json
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -88,7 +88,8 @@ SANCTIONED_MAP_NODES = [
 
 
 def _parse_dt(value: str) -> datetime:
-    return datetime.fromisoformat(value.replace("Z", "+00:00")) if "T" in value else datetime.fromisoformat(value)
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00")) if "T" in value else datetime.fromisoformat(value)
+    return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
 
 
 def _query_all(query: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
@@ -105,7 +106,7 @@ def _query_one(query: str, params: tuple[Any, ...] = ()) -> dict[str, Any] | Non
 def demo_now() -> datetime:
     latest_case = _query_one("select max(start_time) as latest_start from cases")
     latest_start = _parse_dt(latest_case["latest_start"])
-    actual_now = datetime.now()
+    actual_now = datetime.now(UTC)
     if actual_now - latest_start > timedelta(days=120):
         return latest_start + timedelta(hours=8)
     return actual_now

@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services.case_service import dashboard_summary, get_case_transactions, get_str_autofill, list_cases, po_map_risk
+from app.services.case_service import _parse_dt, dashboard_summary, get_case_transactions, get_str_autofill, list_cases, po_map_risk
 from app.services.narrative_service import _normalize_sections, compliance_check, generate_narrative, save_narrative
 from app.services.validation_service import submit_case
 
@@ -71,6 +71,24 @@ def test_crypto_detection_and_compliance_logic():
     assert any(check["rule"] == "Crypto paragraph included" and not check["pass"] for check in failed["checks"])
 
 
+def test_save_narrative_accepts_more_than_three_paragraphs():
+    actor = {"role": "ANALYST", "user_id": "EMP001", "user_name": "Naina Kapoor"}
+    narrative = save_narrative(
+        "CASE001",
+        actor,
+        "Intro paragraph.\n\nBody paragraph.\n\nConclusion paragraph.\n\nAdditional supporting facts.",
+        [],
+        "regression test",
+    )
+    assert [section["id"] for section in narrative["sections"]] == [
+        "introduction",
+        "body",
+        "conclusion",
+        "supporting-detail-1",
+    ]
+    assert narrative["sections"][3]["title"] == "Supporting Detail 1"
+
+
 def test_submission_blocks_when_required_artifacts_are_missing():
     actor = {"role": "ANALYST", "user_id": "EMP001", "user_name": "Naina Kapoor"}
     try:
@@ -98,6 +116,14 @@ def test_case_risk_scores_are_varied_and_case001_is_highest():
     assert scores["CASE003"] == 85
     assert scores["CASE002"] == 84
     assert len(set(scores.values())) == 3
+
+
+def test_parse_dt_normalizes_naive_and_aware_timestamps():
+    naive = _parse_dt("2022-09-21 15:10:00")
+    aware = _parse_dt("2026-03-29T04:16:04.833400+00:00")
+    assert naive.tzinfo is not None
+    assert aware.tzinfo is not None
+    assert aware > naive
 
 
 def test_po_map_includes_sanctioned_country_hotspots():

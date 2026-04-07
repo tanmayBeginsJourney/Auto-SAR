@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProtectedRoute } from '../components/ProtectedRoute'
 import { AnalystDashboardPage } from '../pages/analyst/AnalystDashboardPage'
+import { DataAssemblyPage } from '../pages/analyst/DataAssemblyPage'
 import { GroundsPage } from '../pages/analyst/GroundsPage'
 import { StrAutofillPage } from '../pages/analyst/StrAutofillPage'
 import { ValidationPage } from '../pages/analyst/ValidationPage'
@@ -28,7 +29,7 @@ function jsonResponse(payload: unknown) {
   )
 }
 
-describe('frontend MVP flows', () => {
+describe('frontend flows', () => {
   beforeEach(() => {
     localStorage.clear()
     setSession()
@@ -131,7 +132,7 @@ describe('frontend MVP flows', () => {
     expect(screen.getByText('Blocker')).toBeInTheDocument()
   })
 
-  it('renders locked analyst drafts as non-editable', async () => {
+  it('keeps locked STR autofill drafts editable', async () => {
     vi.spyOn(global, 'fetch').mockImplementation((input) => {
       const url = String(input)
       if (url.endsWith('/api/cases/CASE002')) {
@@ -185,8 +186,94 @@ describe('frontend MVP flows', () => {
     )
 
     expect(await screen.findByText('Part 3')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('BAR-IND-MVP')).toBeDisabled()
-    expect(screen.getByRole('button', { name: /save draft/i })).toBeDisabled()
+    expect(screen.getByDisplayValue('BAR-IND-MVP')).toBeEnabled()
+    expect(screen.getByRole('button', { name: /save draft/i })).toBeEnabled()
+  })
+
+  it('continues from data assembly to STR autofill even for locked cases', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+      if (url.endsWith('/api/cases/CASE003')) {
+        return jsonResponse({
+          caseId: 'CASE003',
+          customerId: 'IND011',
+          customerName: 'Pooja Iyer',
+          customerType: 'INDIVIDUAL',
+          primaryAccountNumber: 'AC1011',
+          assignedEmployee: { employeeId: 'EMP001', name: 'Naina Kapoor', level: 'ANALYST' },
+          stage: 'PENDING_REVIEW',
+          startTime: '',
+          summary: '',
+          totalAlerts: 2,
+          totalAmount: 1545000,
+          riskScore: 85,
+          riskLevel: 'CRITICAL',
+          riskExplanation: '',
+          riskFactors: [],
+          branchCity: 'Bengaluru',
+          sla: { status: 'WITHIN_SLA', remainingHours: 10, display: '10 hrs', deadline: '', explanation: '' },
+          valueAtRisk: 1545000,
+          calculation: '',
+          isCryptoCase: true,
+          workflow: { current_stage: 'PENDING_REVIEW', locked_for_analyst: true },
+          canAnalystEdit: false,
+        })
+      }
+      if (url.endsWith('/api/cases/CASE003/kyc')) {
+        return jsonResponse({
+          customerName: 'Pooja Iyer',
+          customerId: 'IND011',
+          pan: 'ADHPI5508C',
+          occupationOrBusiness: 'Compliance Officer',
+          declaredIncome: 'INR 1900000 p.a.',
+          riskTier: 'HIGH',
+          kycStatus: 'Current',
+          watchlistStatus: 'Possible PEP Match',
+          lastCddRefresh: '2022-09-18',
+          primaryAccount: {
+            accountNumber: 'AC1011',
+            accountType: 'Deposit - Savings',
+            branchCity: 'Bengaluru',
+            accountStatus: 'Active - Under Review',
+          },
+        })
+      }
+      if (url.endsWith('/api/cases/CASE003/transactions')) {
+        return jsonResponse([])
+      }
+      if (url.endsWith('/api/cases/CASE003/alerts')) {
+        return jsonResponse([])
+      }
+      if (url.endsWith('/api/cases/CASE003/prior-alerts')) {
+        return jsonResponse([])
+      }
+      if (url.endsWith('/api/cases/CASE003/entity-graph')) {
+        return jsonResponse({ nodes: [], edges: [] })
+      }
+      if (url.endsWith('/api/cases/CASE003/adverse-media')) {
+        return jsonResponse([])
+      }
+      if (url.endsWith('/api/cases/CASE003/data-assembly/complete-stage')) {
+        throw new Error(`Should not complete stage for locked case: ${init?.method}`)
+      }
+      throw new Error(`Unhandled fetch ${url}`)
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/cases/CASE003/data-assembly']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cases/:caseId/data-assembly" element={<DataAssemblyPage />} />
+            <Route path="/cases/:caseId/str-autofill" element={<div>STR Autofill Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Case Readiness')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /verified\. continue to str autofill/i }))
+    expect(await screen.findByText('STR Autofill Page')).toBeInTheDocument()
   })
 
   it('continues from STR autofill to grounds of suspicion', async () => {
@@ -274,6 +361,69 @@ describe('frontend MVP flows', () => {
     expect(await screen.findByText('Part 3')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /continue to grounds of suspicion/i }))
 
+    expect(await screen.findByText('Grounds Page')).toBeInTheDocument()
+  })
+
+  it('continues from STR autofill to grounds even for locked cases', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+      if (url.endsWith('/api/cases/CASE002')) {
+        return jsonResponse({
+          caseId: 'CASE002',
+          customerId: 'ENT001',
+          customerName: 'Vertex Exports Pvt Ltd',
+          customerType: 'ENTITY',
+          primaryAccountNumber: 'AC2001',
+          assignedEmployee: { employeeId: 'EMP001', name: 'Naina Kapoor', level: 'ANALYST' },
+          stage: 'PENDING_REVIEW',
+          startTime: '',
+          summary: '',
+          totalAlerts: 3,
+          totalAmount: 6402000,
+          riskScore: 84,
+          riskLevel: 'HIGH',
+          riskExplanation: '',
+          riskFactors: [],
+          branchCity: 'Mumbai',
+          sla: { status: 'WITHIN_SLA', remainingHours: 10, display: '10 hrs', deadline: '', explanation: '' },
+          valueAtRisk: 6402000,
+          calculation: '',
+          isCryptoCase: false,
+          workflow: { current_stage: 'PENDING_REVIEW', locked_for_analyst: true },
+          canAnalystEdit: false,
+        })
+      }
+      if (url.endsWith('/api/cases/CASE002/str-autofill') && !init?.method) {
+        return jsonResponse({
+          caseId: 'CASE002',
+          sections: {
+            part3: { branchCity: 'Mumbai', branchCode: 'BAR-IND-MVP', reportingLocation: 'Mumbai' },
+            part7: { groundsSummary: 'Initial summary' },
+          },
+          updatedAt: '',
+          updatedBy: 'system',
+        })
+      }
+      if (url.endsWith('/api/cases/CASE002/str-autofill/complete-stage')) {
+        throw new Error(`Should not complete stage for locked case: ${init?.method}`)
+      }
+      throw new Error(`Unhandled fetch ${url}`)
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/cases/CASE002/str-autofill']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cases/:caseId/str-autofill" element={<StrAutofillPage />} />
+            <Route path="/cases/:caseId/grounds-of-suspicion" element={<div>Grounds Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Part 3')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /continue to grounds of suspicion/i }))
     expect(await screen.findByText('Grounds Page')).toBeInTheDocument()
   })
 
@@ -419,7 +569,7 @@ describe('frontend MVP flows', () => {
     const copilotPrompt = await screen.findByPlaceholderText(/ask for a rewrite/i)
     await user.clear(copilotPrompt)
     await user.type(copilotPrompt, 'Rewrite this to sound more formal.')
-    await user.click(screen.getByRole('button', { name: /ask copilot/i }))
+    await user.click(screen.getByRole('button', { name: /ask ai compliance agent/i }))
 
     expect(await screen.findByText(/tightened the tone/i)).toBeInTheDocument()
     expect(await screen.findByText(/User asked "Rewrite this to sound more formal."/i)).toBeInTheDocument()
@@ -451,5 +601,135 @@ describe('frontend MVP flows', () => {
     await waitFor(() => {
       expect(screen.getByText('Analyst Home')).toBeInTheDocument()
     })
+  })
+
+  it('keeps grounds save and continue available for locked cases', async () => {
+    const user = userEvent.setup()
+    let savedDraft = false
+    vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = String(input)
+      if (url.endsWith('/api/cases/CASE002/grounds')) {
+        return jsonResponse({
+          case: {
+            caseId: 'CASE002',
+            customerId: 'ENT001',
+            customerName: 'Vertex Exports Pvt Ltd',
+            customerType: 'ENTITY',
+            primaryAccountNumber: 'AC2001',
+            assignedEmployee: { employeeId: 'EMP001', name: 'Naina Kapoor', level: 'ANALYST' },
+            stage: 'PENDING_REVIEW',
+            startTime: '',
+            summary: '',
+            totalAlerts: 3,
+            totalAmount: 6402000,
+            riskScore: 84,
+            riskLevel: 'HIGH',
+            riskExplanation: 'Unusual activity.',
+            riskFactors: [{ name: 'Screening alert', contribution: 20, factualBasis: 'Adverse screening hit.' }],
+            branchCity: 'Mumbai',
+            sla: { status: 'WITHIN_SLA', remainingHours: 10, display: '10 hrs', deadline: '', explanation: '' },
+            valueAtRisk: 6402000,
+            calculation: '',
+            isCryptoCase: false,
+            workflow: { current_stage: 'PENDING_REVIEW', locked_for_analyst: true },
+            canAnalystEdit: false,
+          },
+          narrative: {
+            finalText: 'Locked narrative draft.',
+            aiDraftText: 'Locked narrative draft.',
+            sections: [{ id: 'body', title: 'Body', text: 'Locked narrative draft.' }],
+            retrievedGuidance: [],
+            paragraphTraces: [],
+          },
+          dossier: {
+            risk: { riskFactors: [{ name: 'Screening alert', contribution: 20, factualBasis: 'Adverse screening hit.' }] },
+            alerts: [{ alert_id: 'AL004', alert_name: 'Screening alert' }],
+            transactions: [{ transaction_id: 'T023', txn_timestamp: '2022-09-21 10:00:00', amount: 780000 }],
+          },
+        })
+      }
+      if (url.endsWith('/api/cases/CASE002/narrative') && init?.method === 'PUT') {
+        savedDraft = true
+        return jsonResponse({
+          finalText: 'Locked narrative draft.',
+          aiDraftText: 'Locked narrative draft.',
+          sections: [{ id: 'body', title: 'Body', text: 'Locked narrative draft.' }],
+          retrievedGuidance: [],
+          paragraphTraces: [],
+        })
+      }
+      if (url.endsWith('/api/cases/CASE002/narrative/compliance-check') && init?.method === 'POST') {
+        return jsonResponse({ passed: true, checks: [] })
+      }
+      if (url.endsWith('/api/cases/CASE002/narrative/complete-stage')) {
+        throw new Error(`Should not complete stage for locked case: ${init?.method}`)
+      }
+      if (url.endsWith('/api/cases/CASE002/narrative/audit')) {
+        return jsonResponse({ ledgerEntries: [] })
+      }
+      if (url.endsWith('/api/cases/CASE002/narrative/copilot') || url.endsWith('/api/cases/CASE002/narrative/copilot/apply')) {
+        throw new Error(`Unexpected copilot call ${url}`)
+      }
+      throw new Error(`Unhandled fetch ${url}`)
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/cases/CASE002/grounds-of-suspicion']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cases/:caseId/grounds-of-suspicion" element={<GroundsPage />} />
+            <Route path="/cases/:caseId/pre-submission-validation" element={<div>Validation Page</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Narrative Draft')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Generate the draft to start editing.')).toBeEnabled()
+    expect(screen.getByRole('button', { name: /generate draft/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /regenerate conclusion/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /save draft/i })).toBeEnabled()
+    expect(screen.getByRole('button', { name: /continue to validation/i })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: /save draft/i }))
+    await waitFor(() => expect(savedDraft).toBe(true))
+
+    await user.click(screen.getByRole('button', { name: /continue to validation/i }))
+    expect(await screen.findByText('Validation Page')).toBeInTheDocument()
+  })
+
+  it('keeps validation submit available for locked cases when checks pass', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(global, 'fetch').mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.endsWith('/api/cases/CASE002/presubmission-validation')) {
+        return jsonResponse({
+          status: 'PASS',
+          checks: [{ rule: 'Narrative draft exists', passed: true, severity: 'hard', explanation: 'Narrative present' }],
+          hardBlockers: [],
+          warnings: [],
+        })
+      }
+      if (url.endsWith('/api/cases/CASE002/submit')) {
+        return jsonResponse({ status: 'submitted' })
+      }
+      throw new Error(`Unhandled fetch ${url}`)
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/cases/CASE002/pre-submission-validation']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/cases/:caseId/pre-submission-validation" element={<ValidationPage />} />
+            <Route path="/cases/:caseId/submission-confirmed" element={<div>Submission Confirmed</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText('Submission Readiness')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit to principal officer/i })).toBeEnabled()
+    await user.click(screen.getByRole('button', { name: /submit to principal officer/i }))
+    expect(await screen.findByText('Submission Confirmed')).toBeInTheDocument()
   })
 })

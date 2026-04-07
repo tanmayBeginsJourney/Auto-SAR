@@ -39,6 +39,9 @@ export function GroundsPage() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const [piiMasked, setPiiMasked] = useState(true)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [continuing, setContinuing] = useState(false)
   const [copilotQuestion, setCopilotQuestion] = useState('Why is this suspicious?')
   const [copilotResult, setCopilotResult] = useState<CopilotResponse | null>(null)
   const [copilotError, setCopilotError] = useState<string | null>(null)
@@ -53,18 +56,24 @@ export function GroundsPage() {
   const finalText = draftText || grounds.data?.narrative.finalText || ''
 
   const save = async () => {
-    if (!caseItem?.canAnalystEdit) return
-    const saved = await apiRequest<GroundsResponse['narrative']>(`/cases/${caseId}/narrative`, session, {
-      method: 'PUT',
-      body: JSON.stringify({ final_text: finalText, sections: [], edit_reason: 'Analyst review edit' }),
-    })
-    setDraftText(saved.finalText)
-    await grounds.reload()
-    await narrativeAudit.reload()
+    setSaving(true)
+    setActionError(null)
+    try {
+      const saved = await apiRequest<GroundsResponse['narrative']>(`/cases/${caseId}/narrative`, session, {
+        method: 'PUT',
+        body: JSON.stringify({ final_text: finalText, sections: [], edit_reason: 'Analyst review edit' }),
+      })
+      setDraftText(saved.finalText)
+      await grounds.reload()
+      await narrativeAudit.reload()
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to save draft')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const generate = async () => {
-    if (!caseItem?.canAnalystEdit) return
     const generated = await apiRequest<GroundsResponse['narrative']>(`/cases/${caseId}/narrative/generate`, session, {
       method: 'POST',
       body: JSON.stringify({ regenerate: false }),
@@ -75,7 +84,6 @@ export function GroundsPage() {
   }
 
   const regenerateConclusion = async () => {
-    if (!caseItem?.canAnalystEdit) return
     const regenerated = await apiRequest<GroundsResponse['narrative']>(`/cases/${caseId}/narrative/regenerate-section`, session, {
       method: 'POST',
       body: JSON.stringify({ section_id: 'conclusion', instruction: 'Tighten the closing rationale without changing facts.' }),
@@ -86,14 +94,23 @@ export function GroundsPage() {
   }
 
   const continueFlow = async () => {
-    if (!caseItem?.canAnalystEdit) return
-    await save()
-    await apiRequest(`/cases/${caseId}/narrative/compliance-check`, session, { method: 'POST' })
-    await apiRequest(`/cases/${caseId}/narrative/complete-stage`, session, {
-      method: 'POST',
-      body: JSON.stringify({ note: 'Narrative complete' }),
-    })
-    navigate(`/cases/${caseId}/pre-submission-validation`)
+    setContinuing(true)
+    setActionError(null)
+    try {
+      await save()
+      await apiRequest(`/cases/${caseId}/narrative/compliance-check`, session, { method: 'POST' })
+      if (caseItem?.canAnalystEdit) {
+        await apiRequest(`/cases/${caseId}/narrative/complete-stage`, session, {
+          method: 'POST',
+          body: JSON.stringify({ note: 'Narrative complete' }),
+        })
+      }
+      navigate(`/cases/${caseId}/pre-submission-validation`)
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to continue to validation')
+    } finally {
+      setContinuing(false)
+    }
   }
 
   if (grounds.loading) return <LoadingState />
@@ -159,10 +176,10 @@ export function GroundsPage() {
             subtitle="Generate, edit, and selectively regenerate the grounds-of-suspicion narrative."
             action={
               <div className="flex gap-2">
-                <button className="btn-success" disabled={!caseItem.canAnalystEdit} onClick={generate}>
+                <button className="btn-success" onClick={generate} type="button">
                   Generate Draft
                 </button>
-                <button className="btn-highlight" disabled={!caseItem.canAnalystEdit} onClick={regenerateConclusion}>
+                <button className="btn-highlight" onClick={regenerateConclusion} type="button">
                   Regenerate conclusion
                 </button>
               </div>
@@ -170,22 +187,22 @@ export function GroundsPage() {
           >
             <textarea
               className="min-h-[360px] w-full rounded-lg border border-line bg-[#FAFAF8] p-4 text-sm leading-7 outline-none focus:border-accent"
-              disabled={!caseItem.canAnalystEdit}
               placeholder="Generate the draft to start editing."
               value={finalText}
               onChange={(event) => setDraftText(event.target.value)}
             />
             <div className="mt-4 flex justify-end gap-3">
-              <button className="btn-success" disabled={!caseItem.canAnalystEdit} onClick={save}>
-                Save draft
+              <button className="btn-success" disabled={saving || continuing} onClick={save} type="button">
+                {saving ? 'Saving...' : 'Save draft'}
               </button>
-              <button className="btn-primary" disabled={!caseItem.canAnalystEdit} onClick={continueFlow}>
-                Continue to validation
+              <button className="btn-primary" disabled={continuing} onClick={continueFlow} type="button">
+                {continuing ? 'Continuing...' : 'Continue to validation'}
               </button>
             </div>
+            {actionError ? <div className="mt-3 text-sm text-danger">{actionError}</div> : null}
           </SectionCard>
 
-          <SectionCard title="Analyst Copilot" subtitle="Freeform LLM assistance that can suggest updates to the current draft.">
+          <SectionCard title="AI Compliance agent" subtitle="Freeform LLM assistance that can suggest updates to the current draft.">
             <div className="space-y-3">
               <textarea
                 className="min-h-24 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-accent"
@@ -197,6 +214,7 @@ export function GroundsPage() {
                 <button
                   className="btn-secondary"
                   disabled={copilotLoading || !copilotQuestion.trim()}
+                  type="button"
                   onClick={async () => {
                     setCopilotLoading(true)
                     setCopilotError(null)
@@ -214,11 +232,12 @@ export function GroundsPage() {
                     }
                   }}
                 >
-                  {copilotLoading ? 'Thinking...' : 'Ask Copilot'}
+                  {copilotLoading ? 'Thinking...' : 'Ask AI Compliance agent'}
                 </button>
                 <button
                   className="btn-primary"
-                  disabled={!caseItem.canAnalystEdit || !copilotResult?.suggestedText}
+                  disabled={!copilotResult?.suggestedText}
+                  type="button"
                   onClick={async () => {
                     if (!copilotResult?.suggestedText) return
                     await apiRequest(`/cases/${caseId}/narrative/copilot/apply`, session, {

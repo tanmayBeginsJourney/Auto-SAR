@@ -18,8 +18,6 @@ export function ValidationPage() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const validation = useAsyncData<ValidationResponse>(() => apiRequest(`/cases/${caseId}/presubmission-validation`, session), [caseId, session])
-  const caseQuery = useAsyncData<{ canAnalystEdit: boolean }>(() => apiRequest(`/cases/${caseId}`, session), [caseId, session])
-
   if (validation.loading) return <LoadingState />
   if (validation.error || !validation.data) return <ErrorState message={validation.error ?? 'Unable to load validation'} />
 
@@ -58,7 +56,7 @@ export function ValidationPage() {
               <button className="btn-secondary" onClick={runValidation}>
                 Run checks again
               </button>
-              <button className="btn-primary" disabled={validation.data.hardBlockers.length > 0 || !caseQuery.data?.canAnalystEdit} onClick={submit}>
+              <button className="btn-primary" disabled={validation.data.hardBlockers.length > 0} onClick={submit} type="button">
                 Submit to Principal Officer
               </button>
             </div>
